@@ -1,7 +1,7 @@
 namespace NovaChat.Client.Services;
 
 /// <summary>
-/// Message notifications are intentionally disabled in NovaChat.
+/// Message notifications are intentionally disabled in Vexa.
 /// The class remains as a no-op compatibility layer so existing client code
 /// does not need to change and the rest of the application remains stable.
 /// </summary>
