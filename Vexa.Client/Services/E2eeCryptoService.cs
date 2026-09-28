@@ -34,7 +34,7 @@ public sealed class E2eeCryptoService
             var userId = string.IsNullOrWhiteSpace(AuthState.UserId) ? "unknown" : AuthState.UserId.Trim();
             return System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "NovaChat",
+                "Vexa",
                 "e2ee",
                 $"device-{userId}.json");
         }
