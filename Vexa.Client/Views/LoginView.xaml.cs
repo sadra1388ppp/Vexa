@@ -103,7 +103,7 @@ namespace NovaChat.Client.Views
 
         private void ApplyWelcomeText()
         {
-            WelcomeText.Text = "Welcome to NovaChat";
+            WelcomeText.Text = "Welcome to Vexa";
             WelcomeSubText.Text = "Turn on the lamp to get start.";
 
             if (_loginContentPanel == null && LoginCard.Parent is Grid loginColumn)
