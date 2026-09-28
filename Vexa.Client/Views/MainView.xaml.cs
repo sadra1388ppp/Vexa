@@ -102,7 +102,7 @@ public partial class MainView : UserControl
         {
             var chat = _chats.FirstOrDefault(x => x.Chat.Id == message.ChatId);
             var isGroup = chat?.Chat.IsGroup == true;
-            var title = isGroup ? (string.IsNullOrWhiteSpace(chat?.DisplayName) ? "NovaChat" : chat!.DisplayName) : (string.IsNullOrWhiteSpace(message.SenderName) ? "New message" : message.SenderName);
+            var title = isGroup ? (string.IsNullOrWhiteSpace(chat?.DisplayName) ? "Vexa" : chat!.DisplayName) : (string.IsNullOrWhiteSpace(message.SenderName) ? "New message" : message.SenderName);
             var preview = BuildNotificationPreview(message.Content);
             var body = isGroup && !string.IsNullOrWhiteSpace(message.SenderName) ? $"{message.SenderName}: {preview}" : preview;
             NotificationService.ShowMessageNotification(message.ChatId, title, body);
