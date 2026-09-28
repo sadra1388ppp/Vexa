@@ -220,7 +220,7 @@
                         <Border Width="64" Height="64" CornerRadius="20" Background="#D4A373" HorizontalAlignment="Center">
                             <TextBlock Text="N" Foreground="White" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <TextBlock Text="Create your NovaChat account" FontSize="29" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,20,0,7" TextAlignment="Center"/>
+                        <TextBlock Text="Create your Vexa account" FontSize="29" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,20,0,7" TextAlignment="Center"/>
                         <TextBlock Text="Set up your profile and start chatting in one place." FontSize="13" Foreground="#BFC3CA" HorizontalAlignment="Center" Margin="0,0,0,26" TextWrapping="Wrap" TextAlignment="Center"/>
 
                         <TextBlock Text="Username" Style="{StaticResource FieldLabel}"/>
