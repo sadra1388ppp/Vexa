@@ -14,7 +14,7 @@ public partial class App : Application
     private static readonly object LogLock = new();
     private static string LogPath => System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "NovaChat", "logs", "client-crash.log");
+        "Vexa", "logs", "client-crash.log");
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -32,7 +32,7 @@ public partial class App : Application
         catch (Exception ex)
         {
             LogException("Startup feature registration", ex);
-            MessageBox.Show("NovaChat could not initialize all client features. The error has been logged.", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Vexa could not initialize all client features. The error has been logged.", "Vexa", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         base.OnStartup(e);
@@ -54,7 +54,7 @@ public partial class App : Application
     {
         LogException("DispatcherUnhandledException", e.Exception);
         e.Handled = true;
-        MessageBox.Show("An unexpected error occurred. NovaChat will keep running.\n\nThe error was written to the client crash log.", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBox.Show("An unexpected error occurred. Vexa will keep running.\n\nThe error was written to the client crash log.", "Vexa", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
