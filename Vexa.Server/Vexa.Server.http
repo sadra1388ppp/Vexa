@@ -1,0 +1,6 @@
+@Vexa.Server_HostAddress = http://localhost:5256
+
+GET {{Vexa.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -11,7 +11,7 @@ using NovaChat.Server.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNovaChatDatabase(builder.Configuration));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseVexaDatabase(builder.Configuration));
 builder.Services.AddScoped<DatabaseInitializer>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
@@ -51,7 +51,7 @@ try
 }
 catch (Exception exception) when (exception is not OperationCanceledException)
 {
-    app.Logger.LogCritical(exception, "NovaChat server startup database validation failed. The HTTP listener was not started.");
+    app.Logger.LogCritical(exception, "Vexa server startup database validation failed. The HTTP listener was not started.");
     throw;
 }
 

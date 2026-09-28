@@ -22,7 +22,7 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
             .AddCommandLine(args)
             .Build();
         var options = new DbContextOptionsBuilder<AppDbContext>();
-        options.UseNovaChatDatabase(configuration);
+        options.UseVexaDatabase(configuration);
         return new AppDbContext(options.Options);
     }
 }

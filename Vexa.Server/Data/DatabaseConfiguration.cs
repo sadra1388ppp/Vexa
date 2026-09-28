@@ -6,7 +6,7 @@ namespace NovaChat.Server.Data;
 
 public static class DatabaseConfiguration
 {
-    public static DbContextOptionsBuilder UseNovaChatDatabase(
+    public static DbContextOptionsBuilder UseVexaDatabase(
         this DbContextOptionsBuilder options, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");

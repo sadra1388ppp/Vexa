@@ -1,8 +1,8 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $root = Split-Path -Parent $PSScriptRoot
-$project = Join-Path $root 'tools/NovaChat.Scaffolding/NovaChat.Scaffolding.csproj'
-$stage = Join-Path $root 'tools/NovaChat.Scaffolding/.generated'
+$project = Join-Path $root 'tools/Vexa.Scaffolding/Vexa.Scaffolding.csproj'
+$stage = Join-Path $root 'tools/Vexa.Scaffolding/.generated'
 if ([string]::IsNullOrWhiteSpace($env:ConnectionStrings__DefaultConnection)) {
     throw 'Set ConnectionStrings__DefaultConnection to the MariaDB database to scaffold.'
 }
@@ -17,7 +17,7 @@ try {
         'Pomelo.EntityFrameworkCore.MySql', '--project', $project, '--startup-project', $project,
         '--context', 'AppDbContext', '--context-dir', (Join-Path $stage 'Data'),
         '--output-dir', (Join-Path $stage 'Entities'),
-        '--namespace', 'NovaChat.Server.Entities', '--context-namespace', 'NovaChat.Server.Data',
+        '--namespace', 'Vexa.Server.Entities', '--context-namespace', 'Vexa.Server.Data',
         '--table', 'Users', '--table', 'Chats', '--table', 'ChatMembers',
         '--table', 'Messages', '--table', 'Contacts', '--no-onconfiguring', '--force'
     )
@@ -29,8 +29,8 @@ try {
         }
     }
     if (-not (Test-Path (Join-Path $stage 'Data/AppDbContext.cs'))) { throw 'DbContext was not generated.' }
-    $entities = Join-Path $root 'NovaChat.Server/Entities/Generated'
-    $data = Join-Path $root 'NovaChat.Server/Data/Generated'
+    $entities = Join-Path $root 'Vexa.Server/Entities/Generated'
+    $data = Join-Path $root 'Vexa.Server/Data/Generated'
     New-Item -ItemType Directory -Force -Path $entities, $data | Out-Null
     Copy-Item (Join-Path $stage 'Entities/*.cs') $entities -Force
     Copy-Item (Join-Path $stage 'Data/AppDbContext.cs') (Join-Path $data 'AppDbContext.cs') -Force

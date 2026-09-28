@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Vexa.Client/Vexa.Client.csproj" />
+  <Project Path="Vexa.Server/Vexa.Server.csproj" />
+</Solution>

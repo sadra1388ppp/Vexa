@@ -1,8 +1,8 @@
--- Repair an existing MariaDB NovaChat database whose Users.AllowGroupAdds
+-- Repair an existing MariaDB Vexa database whose Users.AllowGroupAdds
 -- was created as a boolean/TINYINT instead of the schema-defined VARCHAR(5).
 --
 -- IMPORTANT:
--- 1. This intentionally matches NovaChat.Server/Data/AppDbContext.Partial.cs.
+-- 1. This intentionally matches Vexa.Server/Data/AppDbContext.Partial.cs.
 -- 2. The ALTER runs first so existing 0/1 values become text safely.
 -- 3. The UPDATE then normalizes those values to the application values
 --    "true" or "false".

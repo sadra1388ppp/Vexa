@@ -1,4 +1,4 @@
-# NovaChat project review
+# Vexa project review
 
 The review covered the supplied server and desktop source, XAML and themes, configuration, DTOs, SignalR hub, web assets, and database remnants. Build caches and repository metadata are not application source.
 
@@ -6,15 +6,15 @@ The review covered the supplied server and desktop source, XAML and themes, conf
 
 | Area | Responsibility |
 | --- | --- |
-| `NovaChat.Server/Program.cs` | Dependency injection, MariaDB configuration, JWT auth, owner policy, schema validation, static files, routes, and SignalR |
+| `Vexa.Server/Program.cs` | Dependency injection, MariaDB configuration, JWT auth, owner policy, schema validation, static files, routes, and SignalR |
 | `Controllers` | User/profile operations; chats and groups; contacts; message deletion/editing; media; owner/admin views |
 | `Services` | EF queries and writes, password hashing/verification, JWT issuance, presence, media envelopes |
 | `Data` and `Entities` | Pomelo-generated EF context/entities plus persistent custom configuration and defaults |
 | `Hubs/ChatHub.cs` | Authenticated connections, presence, chat groups, messaging, and notifications |
-| `NovaChat.Client` | WPF login, registration, conversations, profiles, contacts, group controls, media/voice, owner tools, and themes |
-| `NovaChat.Server/wwwroot` | Small mobile web/PWA prototype and uploaded media |
-| `tools/NovaChat.Scaffolding` | Independent EF reverse-engineering host |
-| `tests/NovaChat.DatabaseChecks` | Integration executable using production persistence sources and a real MariaDB connection |
+| `Vexa.Client` | WPF login, registration, conversations, profiles, contacts, group controls, media/voice, owner tools, and themes |
+| `Vexa.Server/wwwroot` | Small mobile web/PWA prototype and uploaded media |
+| `tools/Vexa.Scaffolding` | Independent EF reverse-engineering host |
+| `tests/Vexa.DatabaseChecks` | Integration executable using production persistence sources and a real MariaDB connection |
 
 The API is the persistence boundary. The WPF client uses REST through `ApiService` and SignalR for live events, with additional polling in partial view classes. It does not connect to MariaDB directly. User IDs remain strings in existing client/API DTOs, while database relationships now use numeric IDs.
 
