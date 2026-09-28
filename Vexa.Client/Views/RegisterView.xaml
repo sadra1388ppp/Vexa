@@ -289,7 +289,7 @@
                                 </Border>
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="Account created successfully" Foreground="#B7F3C8" FontSize="13.5" FontWeight="Bold"/>
-                                    <TextBlock x:Name="RegistrationSuccessTextBlock" Text="Your NovaChat account is ready." Foreground="#BDE7C8" FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                    <TextBlock x:Name="RegistrationSuccessTextBlock" Text="Your Vexa account is ready." Foreground="#BDE7C8" FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
