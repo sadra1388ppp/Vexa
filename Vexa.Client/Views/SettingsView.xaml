@@ -5,7 +5,7 @@
         <Grid Background="{DynamicResource AppBackgroundBrush}" MinHeight="620">
             <StackPanel Width="560" HorizontalAlignment="Center" Margin="28">
                 <TextBlock Text="Settings" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource TextBrush}"/>
-                <TextBlock Text="Personalize how NovaChat looks and feels." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,5,0,22"/>
+                <TextBlock Text="Personalize how Vexa looks and feels." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,5,0,22"/>
                 <Border Padding="22" Background="{DynamicResource PanelBackgroundBrush}" CornerRadius="22" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                     <StackPanel>
                         <TextBlock Text="Appearance" FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}"/>
