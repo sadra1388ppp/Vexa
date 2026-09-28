@@ -57,7 +57,7 @@
                            FontSize="30"
                            FontWeight="Bold"
                            Foreground="{DynamicResource TextBrush}"/>
-                <TextBlock Text="View, search, edit and safely manage NovaChat accounts."
+                <TextBlock Text="View, search, edit and safely manage Vexa accounts."
                            Margin="0,7,0,0"
                            FontSize="14"
                            Foreground="{DynamicResource SecondaryTextBrush}"/>
