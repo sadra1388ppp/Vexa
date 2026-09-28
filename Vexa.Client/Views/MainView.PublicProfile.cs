@@ -21,7 +21,7 @@ public partial class MainView
             var profile = await _apiService.GetAsync<ProfileModel>($"api/User/profile/{Uri.EscapeDataString(userId)}");
             if (profile == null)
             {
-                MessageBox.Show("This user's profile could not be loaded.", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("This user's profile could not be loaded.", "Vexa", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -39,7 +39,7 @@ public partial class MainView
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Could not load this profile.\n\n{ex.Message}", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Could not load this profile.\n\n{ex.Message}", "Vexa", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
