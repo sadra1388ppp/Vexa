@@ -117,7 +117,7 @@ public partial class MainView
         if (_hubConnection?.State != HubConnectionState.Connected)
         {
             MessageBox.Show(
-                "NovaChat is not connected to the server.",
+                "Vexa is not connected to the server.",
                 "Forward Message",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
