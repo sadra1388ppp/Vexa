@@ -1,6 +1,0 @@
-@NovaChat.Server_HostAddress = http://localhost:5256
-
-GET {{NovaChat.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

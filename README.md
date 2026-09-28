@@ -1,6 +1,6 @@
-# NovaChat — MariaDB / EF Core
+# Vexa — MariaDB / EF Core
 
-NovaChat contains an ASP.NET Core API and SignalR server, a Windows WPF client, and a small web/PWA client. This version uses MariaDB through Pomelo and EF Core, with a database-first workflow for updating entities.
+Vexa contains an ASP.NET Core API and SignalR server, a Windows WPF client, and a small web/PWA client. This version uses MariaDB through Pomelo and EF Core, with a database-first workflow for updating entities.
 
 ## Start here
 
@@ -10,13 +10,13 @@ NovaChat contains an ASP.NET Core API and SignalR server, a Windows WPF client, 
 4. Start the server from this directory:
 
    ```powershell
-   dotnet run --project NovaChat.Server --launch-profile http
+   dotnet run --project Vexa.Server --launch-profile http
    ```
 
-5. On Windows, open `NovaChat.slnx` in a .NET 10 capable Visual Studio, or run:
+5. On Windows, open `Vexa.slnx` in a .NET 10 capable Visual Studio, or run:
 
    ```powershell
-   dotnet run --project NovaChat.Client
+   dotnet run --project Vexa.Client
    ```
 
 The desktop client targets `http://localhost:5256`. The HTTP launch profile also exposes Swagger at `http://localhost:5256/swagger`. The bundled web client is an older prototype; its existing API mismatches are listed in the project review.
