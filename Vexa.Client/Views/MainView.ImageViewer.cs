@@ -60,7 +60,7 @@ public partial class MainView
             var bytes = await _apiService.GetBytesAsync($"api/ChatMedia/{messageId}");
             if (bytes == null || bytes.Length == 0)
             {
-                MessageBox.Show("The image could not be loaded.", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("The image could not be loaded.", "Vexa", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -74,7 +74,7 @@ public partial class MainView
 
             var viewer = new Window
             {
-                Title = "NovaChat • Image",
+                Title = "Vexa • Image",
                 Width = 980,
                 Height = 760,
                 MinWidth = 520,
@@ -165,7 +165,7 @@ public partial class MainView
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Could not open the image.\n\n{ex.Message}", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Could not open the image.\n\n{ex.Message}", "Vexa", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
