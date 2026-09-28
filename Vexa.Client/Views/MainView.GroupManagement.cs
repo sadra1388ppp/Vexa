@@ -73,7 +73,7 @@ public partial class MainView
             var done = CreateActionButton("Done", "SecondaryButtonStyle"); done.Width = 92; done.Height = 42; done.Click += (_, _) => dialog.Close(); Grid.SetColumn(done, 1); footer.Children.Add(done); Grid.SetRow(footer, 3); root.Children.Add(footer);
             dialog.Content = root; dialog.ShowDialog();
         }
-        catch (Exception ex) { MessageBox.Show($"Could not load group information.\n\n{ex.Message}", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (Exception ex) { MessageBox.Show($"Could not load group information.\n\n{ex.Message}", "Vexa", MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
     private async Task RenameGroupAsync(GroupInfoDialogState state)
