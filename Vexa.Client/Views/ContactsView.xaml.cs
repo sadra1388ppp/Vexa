@@ -105,7 +105,7 @@ public partial class ContactsView : UserControl
         if (sender is not Button { DataContext: ContactModel contact })
             return;
 
-        if (MessageBox.Show($"Remove {contact.DisplayName} from contacts?", "NovaChat", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+        if (MessageBox.Show($"Remove {contact.DisplayName} from contacts?", "Vexa", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
             return;
 
         var removed = await _apiService.DeleteAsync($"api/Contact/{Uri.EscapeDataString(contact.UserId)}");
