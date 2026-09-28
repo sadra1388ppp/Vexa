@@ -62,7 +62,7 @@ public partial class MainView
             Foreground = (Brush)FindResource("PrimaryBrush"),
             BorderBrush = (Brush)FindResource("BorderBrush"),
             ToolTip = "Voice message",
-            Tag = "NovaChat.Voice"
+            Tag = "Vexa.Voice"
         };
         Grid.SetColumn(voice, 2);
         grid.Children.Add(voice);
@@ -108,7 +108,7 @@ public partial class MainView
                 return;
             }
 
-            var temp = IOPath.Combine(IOPath.GetTempPath(), $"NovaChatVoice_{Guid.NewGuid():N}.wav");
+            var temp = IOPath.Combine(IOPath.GetTempPath(), $"VexaVoice_{Guid.NewGuid():N}.wav");
             _voicePath = temp;
             _voiceStartedAt = DateTime.UtcNow;
             _voiceWriter = new WaveFileWriter(temp, new WaveFormat(44100, 16, 1));
@@ -201,7 +201,7 @@ public partial class MainView
 
     private void UpdateVoiceButtonState(bool recording)
     {
-        var button = FindDescendant<Button>(this, b => b.Tag is string s && s == "NovaChat.Voice");
+        var button = FindDescendant<Button>(this, b => b.Tag is string s && s == "Vexa.Voice");
         if (button == null) return;
 
         button.Content = recording ? "⏹" : "🎙";
@@ -223,7 +223,7 @@ public partial class MainView
             if (result?.Data == null)
             {
                 await Dispatcher.InvokeAsync(() =>
-                    MessageBox.Show(result?.Message ?? "Media upload failed.", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Warning));
+                    MessageBox.Show(result?.Message ?? "Media upload failed.", "Vexa", MessageBoxButton.OK, MessageBoxImage.Warning));
                 return;
             }
 
@@ -237,7 +237,7 @@ public partial class MainView
         catch (Exception ex)
         {
             await Dispatcher.InvokeAsync(() =>
-                MessageBox.Show($"Media could not be sent.\n\n{ex.Message}", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Error));
+                MessageBox.Show($"Media could not be sent.\n\n{ex.Message}", "Vexa", MessageBoxButton.OK, MessageBoxImage.Error));
         }
     }
 
@@ -532,7 +532,7 @@ public partial class MainView
             var bytes = await _apiService.GetBytesAsync($"api/ChatMedia/{messageId}");
             if (bytes == null || bytes.Length == 0) return;
 
-            var path = IOPath.Combine(IOPath.GetTempPath(), $"NovaChatPlay_{messageId}.wav");
+            var path = IOPath.Combine(IOPath.GetTempPath(), $"VexaPlay_{messageId}.wav");
             await File.WriteAllBytesAsync(path, bytes);
             var player = new SoundPlayer(path);
             player.Load();
@@ -543,7 +543,7 @@ public partial class MainView
         catch (Exception ex)
         {
             await Dispatcher.InvokeAsync(() =>
-                MessageBox.Show($"Voice could not be played.\n\n{ex.Message}", "NovaChat", MessageBoxButton.OK, MessageBoxImage.Warning));
+                MessageBox.Show($"Voice could not be played.\n\n{ex.Message}", "Vexa", MessageBoxButton.OK, MessageBoxImage.Warning));
         }
     }
 
