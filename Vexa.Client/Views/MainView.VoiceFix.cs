@@ -111,7 +111,7 @@ public partial class MainView
         {
             CleanupVoiceFixResources(deleteFile: true);
             MessageBox.Show(
-                $"Could not start voice recording.\n\nCheck that Windows allows NovaChat to use your microphone.\n\nDetails: {ex.Message}",
+                $"Could not start voice recording.\n\nCheck that Windows allows Vexa to use your microphone.\n\nDetails: {ex.Message}",
                 "Voice Message",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
