@@ -39,7 +39,7 @@ public partial class MainView
 
     private void InstallVoiceFix()
     {
-        var button = FindDescendant<Button>(this, b => b.Tag is string tag && tag == "NovaChat.Voice");
+        var button = FindDescendant<Button>(this, b => b.Tag is string tag && tag == "Vexa.Voice");
         if (button == null || ReferenceEquals(_voiceFixButton, button)) return;
 
         if (_voiceFixButton != null)
@@ -87,7 +87,7 @@ public partial class MainView
                 outputFormat = wasapi.WaveFormat;
             }
 
-            var tempPath = IOPath.Combine(IOPath.GetTempPath(), $"NovaChatVoice_{Guid.NewGuid():N}.wav");
+            var tempPath = IOPath.Combine(IOPath.GetTempPath(), $"VexaVoice_{Guid.NewGuid():N}.wav");
             _voiceFixPath = tempPath;
             _voiceFixStartedAt = DateTime.UtcNow;
             _voiceFixWriter = new WaveFileWriter(tempPath, outputFormat);
