@@ -175,7 +175,7 @@ public class ChatMediaController : ControllerBase
             var message = await _chatService.SendMessageAsync(chatId, userId.Value, envelope.Serialize());
             if (message == null)
             {
-                System.IO.File.Delete(path);
+                System.IO.File.Delete(finalPath);
                 return BadRequest(new { message = "Unable to create media message." });
             }
 
