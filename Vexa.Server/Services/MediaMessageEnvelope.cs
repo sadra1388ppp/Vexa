@@ -13,6 +13,7 @@ public sealed class MediaMessageEnvelope
     public string ContentType { get; set; } = "application/octet-stream";
     public long Size { get; set; }
     public double? DurationSeconds { get; set; }
+    public string? Sha256 { get; set; }
 
     public string Serialize() => Prefix + JsonSerializer.Serialize(this);
 

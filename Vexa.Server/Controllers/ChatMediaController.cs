@@ -31,15 +31,18 @@ public class ChatMediaController : ControllerBase
     private readonly ChatService _chatService;
     private readonly IWebHostEnvironment _environment;
     private readonly IHubContext<NovaChat.Server.Hubs.ChatHub> _hub;
+    private readonly ExecutableFileSecurityService _executableSecurity;
 
     public ChatMediaController(
         ChatService chatService,
         IWebHostEnvironment environment,
-        IHubContext<NovaChat.Server.Hubs.ChatHub> hub)
+        IHubContext<NovaChat.Server.Hubs.ChatHub> hub,
+        ExecutableFileSecurityService executableSecurity)
     {
         _chatService = chatService;
         _environment = environment;
         _hub = hub;
+        _executableSecurity = executableSecurity;
     }
 
     [HttpPost("{chatId}")]
@@ -95,16 +98,59 @@ public class ChatMediaController : ControllerBase
         }
 
         var root = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
-        var folder = Path.Combine(root, "uploads", "chat", type);
+        var isExecutable = type == "file" &&
+                           string.Equals(extension, ".exe", StringComparison.OrdinalIgnoreCase);
+
+        var storageRoot = isExecutable
+            ? Path.Combine(_environment.ContentRootPath, "secure-uploads", "chat")
+            : Path.Combine(root, "uploads", "chat");
+
+        var folder = Path.Combine(storageRoot, type);
         Directory.CreateDirectory(folder);
 
         var storageName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-        var path = Path.Combine(folder, storageName);
+        var finalPath = Path.Combine(folder, storageName);
+
+        string? quarantinePath = null;
+        ExecutableValidationResult? executableValidation = null;
 
         try
         {
-            await using (var stream = System.IO.File.Create(path))
+            if (isExecutable)
+            {
+                var quarantineFolder = Path.Combine(
+                    _environment.ContentRootPath,
+                    "secure-uploads",
+                    "quarantine");
+
+                Directory.CreateDirectory(quarantineFolder);
+
+                quarantinePath = Path.Combine(
+                    quarantineFolder,
+                    $"{Guid.NewGuid():N}.upload");
+
+                await using (var stream = System.IO.File.Create(quarantinePath))
+                    await file.CopyToAsync(stream, HttpContext.RequestAborted);
+
+                executableValidation = await _executableSecurity.ValidateAsync(
+                    quarantinePath,
+                    HttpContext.RequestAborted);
+
+                if (!executableValidation.IsAccepted)
+                {
+                    TryDeleteFile(quarantinePath);
+                    quarantinePath = null;
+                    return BadRequest(new { message = executableValidation.Message });
+                }
+
+                System.IO.File.Move(quarantinePath, finalPath);
+                quarantinePath = null;
+            }
+            else
+            {
+                await using var stream = System.IO.File.Create(finalPath);
                 await file.CopyToAsync(stream);
+            }
 
             var contentType = type switch
             {
@@ -120,7 +166,8 @@ public class ChatMediaController : ControllerBase
                 FileName = Path.GetFileName(file.FileName),
                 ContentType = contentType,
                 Size = file.Length,
-                DurationSeconds = parsedDuration
+                DurationSeconds = parsedDuration,
+                Sha256 = executableValidation?.Sha256
             };
 
             // Media deliberately stays outside E2EE. Text messages remain E2EE,
@@ -136,17 +183,22 @@ public class ChatMediaController : ControllerBase
             var recipients = chat.ChatMembers.Select(m => m.UserId.ToString()).Distinct(StringComparer.Ordinal);
             await _hub.Clients.Users(recipients).SendAsync("ReceiveMessage", dto);
 
-            return Ok(new { message = "Media sent successfully.", data = dto });
+            return Ok(new
+            {
+                message = isExecutable
+                    ? $"Verified executable sent successfully using {executableValidation!.Scanner}."
+                    : "Media sent successfully.",
+                data = dto
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch
         {
-            try
-            {
-                if (System.IO.File.Exists(path))
-                    System.IO.File.Delete(path);
-            }
-            catch { }
-
+            TryDeleteFile(quarantinePath);
+            TryDeleteFile(finalPath);
             throw;
         }
     }
@@ -165,7 +217,15 @@ public class ChatMediaController : ControllerBase
             return Forbid();
 
         var root = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
-        var uploadRoot = Path.GetFullPath(Path.Combine(root, "uploads", "chat"));
+        var isExecutable = media.Type == "file" &&
+                           string.Equals(
+                               Path.GetExtension(media.FileName),
+                               ".exe",
+                               StringComparison.OrdinalIgnoreCase);
+
+        var uploadRoot = isExecutable
+            ? Path.GetFullPath(Path.Combine(_environment.ContentRootPath, "secure-uploads", "chat"))
+            : Path.GetFullPath(Path.Combine(root, "uploads", "chat"));
         var path = Path.GetFullPath(Path.Combine(uploadRoot, media.StorageName.Replace('/', Path.DirectorySeparatorChar)));
         var rootWithSeparator = uploadRoot.EndsWith(Path.DirectorySeparatorChar)
             ? uploadRoot
@@ -177,6 +237,21 @@ public class ChatMediaController : ControllerBase
         Response.Headers.ContentDisposition = $"inline; filename=\"{Uri.EscapeDataString(media.FileName)}\"";
         Response.Headers.CacheControl = "private, max-age=3600";
         return PhysicalFile(path, media.ContentType, enableRangeProcessing: true);
+    }
+
+    private static void TryDeleteFile(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        try
+        {
+            if (System.IO.File.Exists(path))
+                System.IO.File.Delete(path);
+        }
+        catch
+        {
+        }
     }
 
     private long? CurrentUserId() =>
