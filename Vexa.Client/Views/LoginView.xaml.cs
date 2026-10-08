@@ -63,6 +63,7 @@ namespace NovaChat.Client.Views
         public LoginView()
         {
             InitializeComponent();
+            LoginEnvironmentText.Text = VexaEnvironment.Name.ToUpperInvariant();
             _apiService = new ApiService();
             Loaded += LoginView_Loaded;
             Unloaded += LoginView_Unloaded;
