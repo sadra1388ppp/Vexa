@@ -415,7 +415,7 @@ public partial class MainView
 
     private static async Task<bool> DeleteMessageAsync(int messageId, string mode)
     {
-        using var client = new HttpClient { BaseAddress = new Uri("http://localhost:5256/") };
+        using var client = new HttpClient { BaseAddress = new Uri(VexaEnvironment.ServerBaseUrl) };
         if (!string.IsNullOrWhiteSpace(AuthState.Token)) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthState.Token);
         using var request = new HttpRequestMessage(HttpMethod.Delete, $"api/message-deletion/{messageId}") { Content = JsonContent.Create(new { Mode = mode }) };
         using var response = await client.SendAsync(request);
