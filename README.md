@@ -21,6 +21,36 @@ Vexa contains an ASP.NET Core API and SignalR server, a Windows WPF client, and 
 
 The desktop client targets `http://localhost:5256`. The HTTP launch profile also exposes Swagger at `http://localhost:5256/swagger`. The bundled web client is an older prototype; its existing API mismatches are listed in the project review.
 
+## Development and Staging
+
+The `staging` branch provides an isolated local test setup. The environments use different ports and the WPF client shows the active environment in its login and main headers.
+
+Development:
+
+```powershell
+.\scripts\run-vexa-development.ps1
+```
+
+Client in Development:
+
+```powershell
+dotnet run --project .\Vexa.Client --launch-profile development
+```
+
+Staging:
+
+```powershell
+.\scripts\run-vexa-staging.ps1
+```
+
+Client in Staging:
+
+```powershell
+.\scripts\run-vexa-client-staging.ps1
+```
+
+Staging uses `ASPNETCORE_ENVIRONMENT=Staging`, server port `5257`, and client variable `VEXA_ENVIRONMENT=Staging`. Development uses port `5256`. See [Staging documentation](docs/STAGING.md) for secret configuration and the final database step.
+
 ## Update entities from MariaDB
 
 Set `ConnectionStrings__DefaultConnection` in your terminal, make the intended schema change in MariaDB, then run:
