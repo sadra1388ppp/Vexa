@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "development": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "VEXA_ENVIRONMENT": "Development"
+      }
+    },
+    "staging": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "VEXA_ENVIRONMENT": "Staging"
+      }
+    }
+  }
+}
