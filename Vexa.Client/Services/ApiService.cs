@@ -14,7 +14,7 @@ public class ApiService
 
     public ApiService()
     {
-        _httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:5256/") };
+        _httpClient = new HttpClient { BaseAddress = new Uri(VexaEnvironment.ServerBaseUrl) };
     }
 
     private static JsonSerializerOptions CreateJsonOptions()
