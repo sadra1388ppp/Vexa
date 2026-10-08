@@ -15,7 +15,7 @@ public sealed class AvatarUrlConverter : IValueConverter
         {
             var absoluteUrl = Uri.TryCreate(url, UriKind.Absolute, out var absolute)
                 ? absolute.ToString()
-                : new Uri(new Uri("http://localhost:5256/"), url.TrimStart('/')).ToString();
+                : new Uri(new Uri(VexaEnvironment.ServerBaseUrl), url.TrimStart('/')).ToString();
 
             var separator = absoluteUrl.Contains('?') ? "&" : "?";
             var bitmap = new BitmapImage();
