@@ -30,7 +30,9 @@ public partial class MainView : UserControl
 
     public MainView()
     {
-        InitializeComponent(); ResetActiveChat(); InitializeConversationAvatarFix();
+        InitializeComponent();
+        EnvironmentText.Text = VexaEnvironment.Name.ToUpperInvariant();
+        ResetActiveChat(); InitializeConversationAvatarFix();
         if (!_messageDeletionHandlerRegistered) { EventManager.RegisterClassHandler(typeof(Border), UIElement.MouseRightButtonUpEvent, new MouseButtonEventHandler(OnMessageBubbleRightClick)); _messageDeletionHandlerRegistered = true; }
         SetOwnerMode(false); Loaded += MainView_Loaded; Unloaded += MainView_Unloaded; StartMessageDeletionHook();
     }
