@@ -47,7 +47,7 @@ public partial class MainView : UserControl
     private async Task ConnectSignalRAsync()
     {
         if (!AuthState.IsAuthenticated || _hubConnection != null) return;
-        _hubConnection = new HubConnectionBuilder().WithUrl("http://localhost:5256/hubs/chat", o => o.AccessTokenProvider = () => Task.FromResult(AuthState.Token)!).WithAutomaticReconnect().Build();
+        _hubConnection = new HubConnectionBuilder().WithUrl($"{VexaEnvironment.ServerBaseUrl}hubs/chat", o => o.AccessTokenProvider = () => Task.FromResult(AuthState.Token)!).WithAutomaticReconnect().Build();
         _hubConnection.On<MessageModel>("ReceiveMessage", OnMessageReceived);
         _hubConnection.On<MessageKeyRequestedPayload>("MessageKeyRequested", OnMessageKeyRequested);
         _hubConnection.On<MessageKeyDeliveredPayload>("MessageKeyDelivered", OnMessageKeyDelivered);
