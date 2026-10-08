@@ -78,7 +78,7 @@ catch (Exception exception) when (exception is not OperationCanceledException)
 
 var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "avatars"));
-if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging()) { app.UseSwagger(); app.UseSwaggerUI(); }
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseAuthentication();
@@ -86,6 +86,13 @@ app.UseMiddleware<JwtTokenRevocationMiddleware>();
 app.UseAuthorization();
 app.UseMiddleware<ChatPrivacyMiddleware>();
 app.MapControllers();
+
+app.MapGet("/api/system/environment", (IHostEnvironment environment) => Results.Ok(new
+{
+    environment = environment.EnvironmentName
+}));
+
+app.Logger.LogInformation("Vexa is running in {EnvironmentName} environment.", app.Environment.EnvironmentName);
 
 app.MapPost("/api/User/logout", (
     HttpContext context,
