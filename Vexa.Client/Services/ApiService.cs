@@ -30,8 +30,7 @@ public class ApiService
 
         return new HttpClient(handler)
         {
-            BaseAddress = new Uri("http://localhost:5256/"),
-            Timeout = TimeSpan.FromSeconds(30)
+            BaseAddress = new Uri("http://localhost:5256/")
         };
     }
 
