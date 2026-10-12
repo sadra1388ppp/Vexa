@@ -333,7 +333,7 @@ namespace NovaChat.Client.Views
             }
             catch (HttpRequestException ex)
             {
-                if (ex.Message.Contains("(409 Conflict)", StringComparison.OrdinalIgnoreCase)
+                if (ex.Message.Contains("(409 Conflict)", StringComparison.OrdinalIgnoreCase))
                 {
                     ShowRegistrationError(ExtractApiMessage(ex.Message));
                     await CheckAvailabilityAsync();
