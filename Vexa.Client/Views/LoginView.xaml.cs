@@ -70,12 +70,12 @@ namespace NovaChat.Client.Views
             InitializeComponent();
             _apiService = new ApiService();
 
-            // These surfaces animate their brushes directly below, so avoid caches
-            // that would be invalidated on every animation frame. The lamp itself
-            // remains cached in XAML for cheap transform-based movement.
-            WarmLightOverlay.CacheMode = null;
-            LampGlow.CacheMode = null;
-            LampBulbGlow.CacheMode = null;
+            // These gradient surfaces are static; only their visibility changes.
+            // Cache each one once so WPF can composite opacity animations instead
+            // of repainting full-window/radial gradients every animation frame.
+            WarmLightOverlay.CacheMode = new BitmapCache();
+            LampGlow.CacheMode = new BitmapCache();
+            LampBulbGlow.CacheMode = new BitmapCache();
 
             // The login card contains live text inputs. Never keep the entire
             // interactive tree in a bitmap cache while the user is typing.
@@ -494,12 +494,13 @@ namespace NovaChat.Client.Views
             AnimateBrushColor(LampReflector, Shape.FillProperty, reflectorColor, 280, animate);
             AnimateBrushColor(PullCord, Shape.StrokeProperty, cordColor, 280, animate);
             AnimateBrushColor(LampPull, Shape.FillProperty, pullColor, 280, animate);
-            // Brush opacity avoids an intermediate, full-surface render target.
-            // This matters most for WarmLightOverlay, which covers the whole window.
-            AnimateBrushOpacity(LampGlow, Shape.FillProperty, on ? 1.0 : 0.0, 480, animate);
-            AnimateBrushOpacity(LampBulbGlow, Shape.FillProperty, on ? 0.65 : 0.02, 320, animate);
+            // These elements have BitmapCache enabled, so animate the cached
+            // visuals' opacity. Do not animate brush opacity: that invalidates
+            // the expensive radial-gradient drawing on every frame.
+            AnimateOpacity(LampGlow, on ? 1.0 : 0.0, 480, animate);
+            AnimateOpacity(LampBulbGlow, on ? 0.65 : 0.02, 320, animate);
             AnimateOpacity(LampReflector, on ? 0.55 : 0.0, 320, animate);
-            AnimateBrushOpacity(WarmLightOverlay, Border.BackgroundProperty, on ? 0.78 : 0.0, 720, animate);
+            AnimateOpacity(WarmLightOverlay, on ? 0.78 : 0.0, 720, animate);
             AnimateOpacity(LoginCard, on ? 1.0 : 0.0, 700, animate);
             if (_loginCardShadowSurface != null)
                 AnimateOpacity(_loginCardShadowSurface, on ? 1.0 : 0.0, 700, animate);
@@ -535,42 +536,6 @@ namespace NovaChat.Client.Views
             }
             else
                 target.SetValue(property, new SolidColorBrush(color));
-        }
-
-        private static void AnimateBrushOpacity(
-            DependencyObject target,
-            DependencyProperty brushProperty,
-            double targetOpacity,
-            int milliseconds,
-            bool animate)
-        {
-            if (target.GetValue(brushProperty) is not Brush currentBrush)
-                return;
-
-            Brush brush = currentBrush;
-            if (brush.IsFrozen)
-            {
-                brush = (Brush)brush.Clone();
-                target.SetValue(brushProperty, brush);
-            }
-
-            if (target is UIElement element)
-                element.Opacity = 1.0;
-
-            if (!animate)
-            {
-                brush.BeginAnimation(Brush.OpacityProperty, null);
-                brush.Opacity = targetOpacity;
-                return;
-            }
-
-            var animation = new DoubleAnimation
-            {
-                To = targetOpacity,
-                Duration = TimeSpan.FromMilliseconds(milliseconds),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
-            };
-            brush.BeginAnimation(Brush.OpacityProperty, animation, HandoffBehavior.SnapshotAndReplace);
         }
 
         private static void AnimateOpacity(UIElement element, double target, int milliseconds, bool animate)
