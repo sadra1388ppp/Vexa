@@ -3,22 +3,280 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              HorizontalAlignment="Stretch"
              VerticalAlignment="Stretch"
-             Background="#0F1115">
+             Background="#0B1118">
     <UserControl.Resources>
-        <Style x:Key="GlassSignInButton" TargetType="Button">
-            <Setter Property="OverridesDefaultStyle" Value="True" /><Setter Property="FocusVisualStyle" Value="{x:Null}" /><Setter Property="Foreground" Value="#FFFFFF" /><Setter Property="FontSize" Value="15" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="Background" Value="#D4A373" /><Setter Property="BorderBrush" Value="#E8C79C" /><Setter Property="BorderThickness" Value="1" /><Setter Property="Padding" Value="16,0" /><Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Grid RenderTransformOrigin="0.5,0.5" SnapsToDevicePixels="True"><Grid.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1" /></Grid.RenderTransform><Border x:Name="ButtonGlow" CornerRadius="16" Background="#00D4A373" BorderBrush="#00D4A373" BorderThickness="0" Margin="-5"><Border.Effect><DropShadowEffect Color="#FFD4A373" BlurRadius="0" ShadowDepth="0" Opacity="0" /></Border.Effect></Border><Border x:Name="ButtonSurface" CornerRadius="16" Background="#D4A373" BorderBrush="#E8C79C" BorderThickness="1"><Grid><Border CornerRadius="15" Margin="1" Background="#18FFFFFF" BorderBrush="#24FFFFFF" BorderThickness="1" /><Border x:Name="ButtonTopGlass" CornerRadius="15" Margin="1" Opacity="0"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#DFFFFFFF" Offset="0" /><GradientStop Color="#55FFFFFF" Offset="0.20" /><GradientStop Color="#10FFFFFF" Offset="0.58" /><GradientStop Color="#00FFFFFF" Offset="1" /></LinearGradientBrush></Border.Background></Border><Border x:Name="ButtonShine" Width="90" HorizontalAlignment="Left" Margin="-130,0,0,0" Opacity="0" IsHitTestVisible="False" RenderTransformOrigin="0.5,0.5"><Border.RenderTransform><SkewTransform AngleX="-18" /></Border.RenderTransform><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00FFFFFF" Offset="0" /><GradientStop Color="#CFFFFFFF" Offset="0.5" /><GradientStop Color="#00FFFFFF" Offset="1" /></LinearGradientBrush></Border.Background></Border><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True" /></Grid></Border></Grid><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ButtonSurface" Property="Background" Value="#E5B98E" /><Setter TargetName="ButtonSurface" Property="BorderBrush" Value="#FFF4E6" /><Setter TargetName="ButtonTopGlass" Property="Opacity" Value="1" /><Setter TargetName="ButtonGlow" Property="BorderThickness" Value="5" /><Setter TargetName="ButtonGlow" Property="BorderBrush" Value="#65FFE0A6" /><Setter TargetName="ButtonGlow" Property="Background" Value="#25FFE0A6" /><Setter TargetName="ButtonGlow" Property="Effect"><Setter.Value><DropShadowEffect Color="#FFFFC978" BlurRadius="24" ShadowDepth="0" Opacity="0.95" /></Setter.Value></Setter><Setter TargetName="ButtonShine" Property="Opacity" Value="0.9" /></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="ButtonSurface" Property="Background" Value="#B98253" /><Setter TargetName="ButtonSurface" Property="BorderBrush" Value="#F2D1AE" /><Setter TargetName="ButtonTopGlass" Property="Opacity" Value="0.5" /></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="ButtonSurface" Property="BorderBrush" Value="#FFF4E6" /></Trigger><Trigger Property="IsEnabled" Value="False"><Setter TargetName="ButtonSurface" Property="Opacity" Value="0.45" /></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+        <Style x:Key="AuthFieldLabel" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="#B8C3D0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="1,0,0,7"/>
         </Style>
-        <Style x:Key="GlassTextBox" TargetType="TextBox"><Setter Property="OverridesDefaultStyle" Value="True" /><Setter Property="FocusVisualStyle" Value="{x:Null}" /><Setter Property="Foreground" Value="#FFFFFF" /><Setter Property="Background" Value="#18FFFFFF" /><Setter Property="BorderBrush" Value="#35FFFFFF" /><Setter Property="BorderThickness" Value="1" /><Setter Property="Padding" Value="14,0" /><Setter Property="FontSize" Value="14" /><Setter Property="CaretBrush" Value="#FFFFFF" /><Setter Property="SelectionBrush" Value="#66D4A373" /><Setter Property="SelectionTextBrush" Value="#FFFFFF" /><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox"><Grid><Border x:Name="Box" CornerRadius="14" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"><ScrollViewer x:Name="PART_ContentHost" Margin="0" VerticalAlignment="Center" /></Border><Border x:Name="FocusGlow" CornerRadius="14" BorderBrush="#00D4A373" BorderThickness="1" IsHitTestVisible="False" /></Grid><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Box" Property="Background" Value="#25FFFFFF" /><Setter TargetName="Box" Property="BorderBrush" Value="#90FFFFFF" /><Setter TargetName="FocusGlow" Property="BorderBrush" Value="#45D4A373" /></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Box" Property="Background" Value="#30FFFFFF" /><Setter TargetName="Box" Property="BorderBrush" Value="#FFD4A373" /><Setter TargetName="FocusGlow" Property="BorderBrush" Value="#90D4A373" /></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
-        <Style x:Key="GlassPasswordBox" TargetType="PasswordBox"><Setter Property="OverridesDefaultStyle" Value="True" /><Setter Property="FocusVisualStyle" Value="{x:Null}" /><Setter Property="Foreground" Value="#FFFFFF" /><Setter Property="Background" Value="#18FFFFFF" /><Setter Property="BorderBrush" Value="#35FFFFFF" /><Setter Property="BorderThickness" Value="1" /><Setter Property="Padding" Value="14,0" /><Setter Property="FontSize" Value="14" /><Setter Property="CaretBrush" Value="#FFFFFF" /><Setter Property="SelectionBrush" Value="#66D4A373" /><Setter Property="SelectionTextBrush" Value="#FFFFFF" /><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="PasswordBox"><Grid><Border x:Name="Box" CornerRadius="14" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"><ScrollViewer x:Name="PART_ContentHost" Margin="0" VerticalAlignment="Center" /></Border><Border x:Name="FocusGlow" CornerRadius="14" BorderBrush="#00D4A373" BorderThickness="1" IsHitTestVisible="False" /></Grid><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Box" Property="Background" Value="#25FFFFFF" /><Setter TargetName="Box" Property="BorderBrush" Value="#90FFFFFF" /><Setter TargetName="FocusGlow" Property="BorderBrush" Value="#45D4A373" /></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Box" Property="Background" Value="#30FFFFFF" /><Setter TargetName="Box" Property="BorderBrush" Value="#FFD4A373" /><Setter TargetName="FocusGlow" Property="BorderBrush" Value="#90D4A373" /></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
-        <Style x:Key="CreateAccountButton" TargetType="Button"><Setter Property="OverridesDefaultStyle" Value="True" /><Setter Property="FocusVisualStyle" Value="{x:Null}" /><Setter Property="Foreground" Value="#D4A373" /><Setter Property="Background" Value="Transparent" /><Setter Property="BorderBrush" Value="Transparent" /><Setter Property="BorderThickness" Value="0" /><Setter Property="Cursor" Value="Hand" /><Setter Property="FontSize" Value="12" /><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border x:Name="CreateSurface" CornerRadius="10" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" Padding="10,4"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" /></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="CreateSurface" Property="Background" Value="#25D4A373" /><Setter TargetName="CreateSurface" Property="BorderBrush" Value="#80D4A373" /><Setter Property="Foreground" Value="#FFF2DC" /></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="CreateSurface" Property="Background" Value="#40D4A373" /></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
+
+        <Style x:Key="AuthTextBox" TargetType="{x:Type TextBox}">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Padding" Value="13,0"/>
+            <Setter Property="Foreground" Value="#F5F7FA"/>
+            <Setter Property="Background" Value="#0D141D"/>
+            <Setter Property="BorderBrush" Value="#2B3949"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="CaretBrush" Value="#D4A373"/>
+            <Setter Property="SelectionBrush" Value="#665C4533"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border x:Name="FieldBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="11">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="1,0"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="FieldBorder" Property="BorderBrush" Value="#46586B"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="FieldBorder" Property="BorderBrush" Value="#D4A373"/>
+                                <Setter TargetName="FieldBorder" Property="Background" Value="#111B27"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="FieldBorder" Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AuthPasswordBox" TargetType="{x:Type PasswordBox}">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Padding" Value="13,0"/>
+            <Setter Property="Foreground" Value="#F5F7FA"/>
+            <Setter Property="Background" Value="#0D141D"/>
+            <Setter Property="BorderBrush" Value="#2B3949"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="CaretBrush" Value="#D4A373"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type PasswordBox}">
+                        <Border x:Name="FieldBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="11">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="1,0"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="FieldBorder" Property="BorderBrush" Value="#46586B"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="FieldBorder" Property="BorderBrush" Value="#D4A373"/>
+                                <Setter TargetName="FieldBorder" Property="Background" Value="#111B27"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="FieldBorder" Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AuthPrimaryButton" TargetType="{x:Type Button}">
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Foreground" Value="#151A20"/>
+            <Setter Property="Background" Value="#D4A373"/>
+            <Setter Property="BorderBrush" Value="#E8C79C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="11">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#E4B98D"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#F3DCC0"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#BD895D"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AuthLinkButton" TargetType="{x:Type Button}">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Foreground" Value="#D4A373"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="LinkSurface"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="9">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="LinkSurface" Property="Background" Value="#1CD4A373"/>
+                                <Setter Property="Foreground" Value="#F1D5B5"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="LinkSurface" Property="Background" Value="#30D4A373"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
-    <Grid x:Name="LoginRoot" Background="#0F1115">
-        <Grid.Resources><DropShadowEffect x:Key="LampShadow" BlurRadius="18" ShadowDepth="4" Opacity="0.35" /></Grid.Resources>
-        <Border x:Name="WarmLightOverlay" IsHitTestVisible="False" Opacity="0"><Border.Background><RadialGradientBrush Center="0.28,0.42" GradientOrigin="0.28,0.42" RadiusX="0.62" RadiusY="0.72"><GradientStop Color="#FFFFF3B8" Offset="0" /><GradientStop Color="#70FFD66E" Offset="0.22" /><GradientStop Color="#28FFD66E" Offset="0.48" /><GradientStop Color="#00FFD66E" Offset="1" /></RadialGradientBrush></Border.Background></Border>
-        <Grid Margin="35,0,35,0"><Grid.ColumnDefinitions><ColumnDefinition Width="470" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-            <Grid Grid.Column="0" Width="420" Height="500" HorizontalAlignment="Center"><Canvas x:Name="LampCanvas" Width="420" Height="500" Background="Transparent" MouseMove="LampCanvas_MouseMove" MouseLeftButtonUp="LampCanvas_MouseLeftButtonUp"><Canvas.RenderTransform><TranslateTransform Y="-42.8" /></Canvas.RenderTransform><Ellipse x:Name="LampGlow" Width="370" Height="370" Canvas.Left="30" Canvas.Top="35" IsHitTestVisible="False" Opacity="0"><Ellipse.Fill><RadialGradientBrush><GradientStop Color="#FFFFF8D6" Offset="0" /><GradientStop Color="#FFFFDB8A" Offset="0.20" /><GradientStop Color="#45FFD66E" Offset="0.50" /><GradientStop Color="#00FFD66E" Offset="1" /></RadialGradientBrush></Ellipse.Fill></Ellipse><Canvas x:Name="LampAssembly" Width="244" Height="366" Canvas.Left="128" Canvas.Top="104.8" RenderTransformOrigin="0.5,0.36" Effect="{StaticResource LampShadow}"><Canvas.RenderTransform><RotateTransform x:Name="LampRotateTransform" Angle="0" /></Canvas.RenderTransform><Rectangle Width="19.5" Height="195.2" Canvas.Left="112.2" Canvas.Top="122" RadiusX="9.75" RadiusY="9.75" Fill="#D1CCC2" /><Rectangle Width="97.6" Height="14.6" Canvas.Left="73.2" Canvas.Top="305" RadiusX="7.3" RadiusY="7.3" Fill="#D1CCC2" /><Path x:Name="LampBulb" Data="M 36.6,134.2 C 36.6,61 207.4,61 207.4,134.2 C 207.4,152.5 36.6,152.5 36.6,134.2 Z" Fill="#F5F0E6" /><Path x:Name="LampShadeGlow" Data="M 36.6,134.2 C 36.6,61 207.4,61 207.4,134.2 C 207.4,152.5 36.6,152.5 36.6,134.2 Z" Fill="#FFFFFF" Opacity="0.04" IsHitTestVisible="False" /><Ellipse x:Name="LampBulbGlow" Width="146.4" Height="73.2" Canvas.Left="48.8" Canvas.Top="92.7" Fill="#FFDB8A" Opacity="0" IsHitTestVisible="False" /><Path x:Name="LampReflector" Data="M 0,0 L 0,0" Fill="#282A31" Opacity="0" IsHitTestVisible="False" /></Canvas><Path x:Name="PullCord" Stroke="#555555" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" IsHitTestVisible="False" /><Ellipse x:Name="LampPull" Width="15" Height="15" Canvas.Left="322.5" Canvas.Top="342.5" Fill="#D4A373" Stroke="#E8C79C" StrokeThickness="1" Cursor="Hand" MouseLeftButtonDown="LampPull_MouseLeftButtonDown" RenderTransformOrigin="0.5,0.5"><Ellipse.RenderTransform><TranslateTransform x:Name="LampPullTransform" X="0" Y="0" /></Ellipse.RenderTransform></Ellipse><StackPanel Canvas.Left="55" Canvas.Top="24" Width="310" HorizontalAlignment="Center"><TextBlock x:Name="WelcomeText" Text="Welcome to Vexa" FontSize="27" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" TextAlignment="Center" /></StackPanel><StackPanel Canvas.Left="55" Canvas.Top="455" Width="310" HorizontalAlignment="Center"><TextBlock x:Name="WelcomeSubText" Text="Pull the cord to turn on the light" FontSize="20" Foreground="#9EA3AB" HorizontalAlignment="Center" TextAlignment="Center" /></StackPanel></Canvas></Grid>
-            <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="390" Margin="0,0,25,0"><Border x:Name="LoginCard" Background="#B91A1D22" BorderBrush="#55FFFFFF" BorderThickness="1" CornerRadius="30" Padding="32" Opacity="0" IsHitTestVisible="False"><Border.Effect><DropShadowEffect x:Name="LoginCardShadow" BlurRadius="42" ShadowDepth="16" Opacity="0.30" /></Border.Effect><StackPanel><TextBlock x:Name="SignInTitle" Text="Sign In" FontSize="25" FontWeight="Medium" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,25" /><TextBlock Text="Username, Email or Phone Number" FontSize="12" Foreground="#B4B7BD" Margin="5,0,0,7" /><TextBox x:Name="UserIdTextBox" Height="48" Margin="0,0,0,18" Style="{StaticResource GlassTextBox}" /><TextBlock Text="Password" FontSize="12" Foreground="#B4B7BD" Margin="5,0,0,7" /><PasswordBox x:Name="PasswordBox" Height="48" Margin="0,0,0,20" Style="{StaticResource GlassPasswordBox}" /><Button x:Name="LoginButton" Content="Sign In" Height="50" IsDefault="True" Click="LoginButton_Click" Style="{StaticResource GlassSignInButton}" /><TextBlock x:Name="SignInSubtitle" Text="Continue to your Vexa account" FontSize="11" Foreground="#8E939B" HorizontalAlignment="Center" Margin="0,18,0,0" /><Button x:Name="CreateAccountButton" Content="Create a new account" Height="36" Margin="0,8,0,0" Click="CreateAccountButton_Click" Style="{StaticResource CreateAccountButton}" /></StackPanel></Border></Grid>
+
+    <Grid x:Name="LoginRoot">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#0B1118" Offset="0"/>
+                <GradientStop Color="#111B27" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Grid Margin="42,30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.08*"/>
+                <ColumnDefinition Width="0.92*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Margin="0,0,30,0"
+                    Padding="4,20,38,20"
+                    BorderBrush="#263443"
+                    BorderThickness="0,0,1,0">
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="58" Height="58" CornerRadius="17" Background="#D4A373">
+                            <TextBlock Text="V" FontSize="34" FontWeight="Bold" Foreground="#121820"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Margin="15,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="VEXA" FontSize="22" FontWeight="Bold" Foreground="#F5F7FA"/>
+                            <TextBlock Text="MESSAGING, REIMAGINED" FontSize="9" FontWeight="Bold"
+                                       Foreground="#D4A373" Margin="1,4,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Text="Your conversations.&#10;Your space."
+                               FontSize="39" FontWeight="SemiBold" Foreground="#F5F7FA"
+                               LineHeight="47" TextWrapping="Wrap" Margin="0,42,0,15"/>
+                    <TextBlock Text="A calmer place to connect, share ideas, and keep up with the people who matter."
+                               FontSize="15" LineHeight="24" Foreground="#AAB7C5"
+                               TextWrapping="Wrap" MaxWidth="410"/>
+
+                    <Border Height="1" Background="#2A3949" Margin="0,30,0,22"/>
+
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,17">
+                            <Border Width="34" Height="34" CornerRadius="10" Background="#1C2A38">
+                                <TextBlock Text="01" FontSize="11" FontWeight="Bold" Foreground="#D4A373"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Simple by design" Foreground="#E7ECF2" FontSize="12.5" FontWeight="SemiBold"/>
+                                <TextBlock Text="The essentials, without the clutter." Foreground="#8594A4" FontSize="11" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="34" Height="34" CornerRadius="10" Background="#1C2A38">
+                                <TextBlock Text="02" FontSize="11" FontWeight="Bold" Foreground="#D4A373"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Your choices matter" Foreground="#E7ECF2" FontSize="12.5" FontWeight="SemiBold"/>
+                                <TextBlock Text="Manage how people can reach you." Foreground="#8594A4" FontSize="11" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="LoginCard"
+                    Grid.Column="1"
+                    Width="420"
+                    MaxWidth="420"
+                    Padding="32"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="#121C27"
+                    BorderBrush="#2B3A4A"
+                    BorderThickness="1"
+                    CornerRadius="22">
+                <StackPanel>
+                    <Border Width="46" Height="4" CornerRadius="2" Background="#D4A373"
+                            HorizontalAlignment="Center" Margin="0,0,0,23"/>
+                    <TextBlock x:Name="SignInTitle" Text="Welcome back"
+                               FontSize="27" FontWeight="SemiBold" Foreground="#F5F7FA"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="SignInSubtitle" Text="Sign in to continue to Vexa."
+                               FontSize="12" Foreground="#9DABBA"
+                               HorizontalAlignment="Center" Margin="0,8,0,19"
+                               TextAlignment="Center"/>
+                    <Border Background="#1B2A38" BorderBrush="#304357" BorderThickness="1"
+                            CornerRadius="8" Padding="10,5" HorizontalAlignment="Center"
+                            Margin="0,0,0,25">
+                        <TextBlock x:Name="LoginEnvironmentText" Text="DEVELOPMENT"
+                                   FontSize="9" FontWeight="Bold" Foreground="#E7C39E"/>
+                    </Border>
+
+                    <TextBlock Text="USERNAME, EMAIL OR PHONE" Style="{StaticResource AuthFieldLabel}"/>
+                    <TextBox x:Name="UserIdTextBox" Style="{StaticResource AuthTextBox}"
+                             Margin="0,0,0,19" MaxLength="254"/>
+
+                    <TextBlock Text="PASSWORD" Style="{StaticResource AuthFieldLabel}"/>
+                    <PasswordBox x:Name="PasswordBox" Style="{StaticResource AuthPasswordBox}"
+                                 Margin="0,0,0,8" MaxLength="100"/>
+
+                    <TextBlock x:Name="LoginStatusTextBlock" Text=""
+                               Visibility="Collapsed" FontSize="11.5" TextWrapping="Wrap"
+                               Foreground="#AAB7C5" Margin="1,5,1,5"/>
+
+                    <Button x:Name="LoginButton" Content="Sign in"
+                            Style="{StaticResource AuthPrimaryButton}" Margin="0,14,0,0"
+                            IsDefault="True" Click="LoginButton_Click"/>
+                    <TextBlock Text="Secure sign-in to your Vexa account"
+                               FontSize="10.5" Foreground="#7F8D9C"
+                               HorizontalAlignment="Center" Margin="0,16,0,3"/>
+                    <Button x:Name="CreateAccountButton" Content="Create a new account"
+                            Style="{StaticResource AuthLinkButton}"
+                            Click="CreateAccountButton_Click"/>
+                </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>
