@@ -16,6 +16,9 @@ namespace NovaChat.Client.Views
         private int _registrationInProgress;
         private CancellationTokenSource? _availabilityCts;
         private bool _suppressRegistrationStatusReset;
+        private bool _usernameTaken;
+        private bool _emailTaken;
+        private bool _phoneTaken;
 
         public event Action? BackToLoginRequested;
 
@@ -23,29 +26,72 @@ namespace NovaChat.Client.Views
         {
             InitializeComponent();
             _apiService = new ApiService();
+            Unloaded += RegisterView_Unloaded;
+            UpdateRegisterButtonState();
+        }
+
+        private void RegisterView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            var pendingCheck = _availabilityCts;
+            _availabilityCts = null;
+            pendingCheck?.Cancel();
+            pendingCheck?.Dispose();
         }
 
         private async void UsernameTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!_suppressRegistrationStatusReset)
-                HideRegistrationStatus();
+            if (_suppressRegistrationStatusReset)
+                return;
+
+            HideRegistrationStatus();
+            _usernameTaken = false;
+            UsernameDuplicateText.Visibility = Visibility.Collapsed;
+            UpdateRegisterButtonState();
             await CheckAvailabilityAsync();
         }
 
         private async void EmailTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!_suppressRegistrationStatusReset)
-                HideRegistrationStatus();
+            if (_suppressRegistrationStatusReset)
+                return;
+
+            HideRegistrationStatus();
+            _emailTaken = false;
+            EmailDuplicateText.Visibility = Visibility.Collapsed;
+            UpdateRegisterButtonState();
             await CheckAvailabilityAsync();
         }
 
         private async void PhoneNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!_suppressRegistrationStatusReset)
-                HideRegistrationStatus();
+            if (_suppressRegistrationStatusReset)
+                return;
+
+            HideRegistrationStatus();
+            _phoneTaken = false;
+            PhoneDuplicateText.Visibility = Visibility.Collapsed;
             PhoneHintText.Visibility = string.IsNullOrEmpty(PhoneNumberTextBox.Text) ? Visibility.Visible : Visibility.Collapsed;
             ValidatePhoneNumber();
+            UpdateRegisterButtonState();
             await CheckAvailabilityAsync();
+        }
+
+        private void DisplayNameTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_suppressRegistrationStatusReset)
+                return;
+
+            HideRegistrationStatus();
+            UpdateRegisterButtonState();
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (_suppressRegistrationStatusReset)
+                return;
+
+            HideRegistrationStatus();
+            UpdateRegisterButtonState();
         }
 
         private void PhoneNumberTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -78,8 +124,55 @@ namespace NovaChat.Client.Views
         private void ValidatePhoneNumber()
         {
             var phone = PhoneNumberTextBox.Text.Trim();
-            var valid = phone.Length == 11 && phone[0] == '0' && phone.All(ch => ch >= '0' && ch <= '9');
-            PhoneValidationText.Visibility = string.IsNullOrWhiteSpace(phone) || valid ? Visibility.Collapsed : Visibility.Visible;
+            PhoneValidationText.Visibility = string.IsNullOrWhiteSpace(phone) || IsValidPhoneNumber(phone)
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+        }
+
+        private static bool IsValidPhoneNumber(string phone) =>
+            phone.Length == 11 && phone[0] == '0' && phone.All(ch => ch >= '0' && ch <= '9');
+
+        private static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                var address = new System.Net.Mail.MailAddress(email);
+                return string.Equals(address.Address, email, StringComparison.OrdinalIgnoreCase);
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
+        private void UpdateRegisterButtonState()
+        {
+            if (RegisterButton == null)
+                return;
+
+            var username = UsernameTextBox.Text.Trim();
+            var displayName = DisplayNameTextBox.Text.Trim();
+            var email = EmailTextBox.Text.Trim();
+            var phone = PhoneNumberTextBox.Text.Trim();
+            var password = PasswordBox.Password;
+
+            var locallyValid =
+                username.Length >= 3 &&
+                username.Length <= 32 &&
+                !string.IsNullOrWhiteSpace(displayName) &&
+                IsValidEmail(email) &&
+                IsValidPhoneNumber(phone) &&
+                !string.IsNullOrWhiteSpace(password);
+
+            RegisterButton.IsEnabled =
+                Volatile.Read(ref _registrationInProgress) == 0 &&
+                locallyValid &&
+                !_usernameTaken &&
+                !_emailTaken &&
+                !_phoneTaken;
         }
 
         private static string GetProposedText(TextBox box, string insertedText)
@@ -89,42 +182,71 @@ namespace NovaChat.Client.Views
             return box.Text.Remove(start, length).Insert(start, insertedText);
         }
 
-        private async System.Threading.Tasks.Task CheckAvailabilityAsync()
+        private async Task CheckAvailabilityAsync()
         {
-            _availabilityCts?.Cancel();
-            _availabilityCts?.Dispose();
-            _availabilityCts = new CancellationTokenSource();
-            var token = _availabilityCts.Token;
+            var previousCheck = _availabilityCts;
+            var currentCheck = new CancellationTokenSource();
+            _availabilityCts = currentCheck;
+            previousCheck?.Cancel();
+            previousCheck?.Dispose();
 
+            var token = currentCheck.Token;
             var username = UsernameTextBox.Text.Trim();
             var email = EmailTextBox.Text.Trim();
             var phone = PhoneNumberTextBox.Text.Trim();
 
-            UsernameDuplicateText.Visibility = Visibility.Collapsed;
-            EmailDuplicateText.Visibility = Visibility.Collapsed;
-            PhoneDuplicateText.Visibility = Visibility.Collapsed;
+            // Don't contact the server for empty or obviously incomplete fields.
+            var usernameToCheck = username.Length is >= 3 and <= 32 ? username : string.Empty;
+            var emailToCheck = email.Contains('@') ? email : string.Empty;
+            var phoneToCheck = IsValidPhoneNumber(phone) ? phone : string.Empty;
+
+            if (string.IsNullOrWhiteSpace(usernameToCheck) &&
+                string.IsNullOrWhiteSpace(emailToCheck) &&
+                string.IsNullOrWhiteSpace(phoneToCheck))
+            {
+                UpdateRegisterButtonState();
+                return;
+            }
 
             try
             {
-                await System.Threading.Tasks.Task.Delay(350, token);
-                if (token.IsCancellationRequested)
-                    return;
+                // Debounce typing, and pass the same token to HttpClient so superseded
+                // availability checks are cancelled instead of running in the background.
+                await Task.Delay(400, token);
 
-                var query = $"api/User/registration-availability?username={Uri.EscapeDataString(username)}&email={Uri.EscapeDataString(email)}&phoneNumber={Uri.EscapeDataString(phone)}";
-                var result = await _apiService.GetAsync<RegistrationAvailabilityResponse>(query);
+                var query =
+                    $"api/User/registration-availability?username={Uri.EscapeDataString(usernameToCheck)}" +
+                    $"&email={Uri.EscapeDataString(emailToCheck)}" +
+                    $"&phoneNumber={Uri.EscapeDataString(phoneToCheck)}";
+
+                var result = await _apiService.GetAsync<RegistrationAvailabilityResponse>(query, token);
                 if (token.IsCancellationRequested || result == null)
                     return;
 
-                UsernameDuplicateText.Visibility = result.UsernameTaken ? Visibility.Visible : Visibility.Collapsed;
-                EmailDuplicateText.Visibility = result.EmailTaken ? Visibility.Visible : Visibility.Collapsed;
-                PhoneDuplicateText.Visibility = result.PhoneTaken ? Visibility.Visible : Visibility.Collapsed;
-                RegisterButton.IsEnabled = !result.UsernameTaken && !result.EmailTaken && !result.PhoneTaken;
+                _usernameTaken = !string.IsNullOrWhiteSpace(usernameToCheck) && result.UsernameTaken;
+                _emailTaken = !string.IsNullOrWhiteSpace(emailToCheck) && result.EmailTaken;
+                _phoneTaken = !string.IsNullOrWhiteSpace(phoneToCheck) && result.PhoneTaken;
+
+                UsernameDuplicateText.Visibility = _usernameTaken ? Visibility.Visible : Visibility.Collapsed;
+                EmailDuplicateText.Visibility = _emailTaken ? Visibility.Visible : Visibility.Collapsed;
+                PhoneDuplicateText.Visibility = _phoneTaken ? Visibility.Visible : Visibility.Collapsed;
+                UpdateRegisterButtonState();
             }
             catch (OperationCanceledException)
             {
+                // Expected when the user continues typing or leaves the page.
+            }
+            catch (HttpRequestException)
+            {
+                // Availability is only a convenience check; the server still validates
+                // uniqueness on registration. Don't lock the form if the server is busy.
+                if (!token.IsCancellationRequested)
+                    UpdateRegisterButtonState();
             }
             catch
             {
+                if (!token.IsCancellationRequested)
+                    UpdateRegisterButtonState();
             }
         }
 
@@ -166,6 +288,7 @@ namespace NovaChat.Client.Views
                 }
 
                 RegisterButton.IsEnabled = false;
+                RegisterButton.Content = "Creating account…";
 
                 var request = new RegisterRequest
                 {
@@ -208,7 +331,16 @@ namespace NovaChat.Client.Views
                 }
 
                 RegistrationMessagePrivacyChanged(this, new RoutedEventArgs());
-                ShowRegistrationSuccess("Your NovaChat account is ready. You can create another account or return to sign in.");
+                _usernameTaken = false;
+                _emailTaken = false;
+                _phoneTaken = false;
+                UsernameDuplicateText.Visibility = Visibility.Collapsed;
+                EmailDuplicateText.Visibility = Visibility.Collapsed;
+                PhoneDuplicateText.Visibility = Visibility.Collapsed;
+                PhoneHintText.Visibility = Visibility.Visible;
+                ValidatePhoneNumber();
+                UpdateRegisterButtonState();
+                ShowRegistrationSuccess("Your Vexa account is ready. Return to sign in whenever you're ready.");
             }
             catch (HttpRequestException ex)
             {
@@ -221,14 +353,15 @@ namespace NovaChat.Client.Views
 
                 ShowRegistrationError(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ShowRegistrationError($"Could not connect to the server.\n\n{ex.Message}");
+                ShowRegistrationError("Vexa could not be reached. Check that the server is running and try again.");
             }
             finally
             {
                 Interlocked.Exchange(ref _registrationInProgress, 0);
-                RegisterButton.IsEnabled = true;
+                RegisterButton.Content = "Create account";
+                UpdateRegisterButtonState();
             }
         }
 
