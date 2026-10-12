@@ -64,6 +64,14 @@ namespace NovaChat.Client.Views
         {
             InitializeComponent();
             _apiService = new ApiService();
+
+            // These static gradient surfaces only animate opacity. Cache their
+            // rasterized output so WPF can composite them instead of repainting
+            // the gradients on each animation frame.
+            WarmLightOverlay.CacheMode = new BitmapCache();
+            LampGlow.CacheMode = new BitmapCache();
+            LampBulbGlow.CacheMode = new BitmapCache();
+
             Loaded += LoginView_Loaded;
             Unloaded += LoginView_Unloaded;
         }
@@ -313,10 +321,11 @@ namespace NovaChat.Client.Views
             ApplyLampTransform();
         }
 
-        private double SimulateCord(double dt)
+        private void SimulateCord(double dt)
         {
             if (!_cordInitialized)
                 InitializeCordRope();
+
             int last = CordPointCount - 1;
             _cordPoints[0] = new Point(CordTopX, CordTopY);
             _cordPoints[last] = new Point(CordTopX + _pullX, RestPullY + _pullY);
@@ -330,6 +339,8 @@ namespace NovaChat.Client.Views
                 _cordPoints[i] = current + velocity + new Vector(0, CordGravity) * dt * dt;
             }
 
+            // The rope has only seven points; keep the constraint solve compact.
+            // Its speed was calculated here previously but never used by the caller.
             for (int iteration = 0; iteration < CordConstraintIterations; iteration++)
             {
                 _cordPoints[0] = new Point(CordTopX, CordTopY);
@@ -342,11 +353,13 @@ namespace NovaChat.Client.Views
                     double distance = delta.Length;
                     if (distance < 0.0001)
                         continue;
+
                     double error = (distance - _cordSegmentLength) / distance;
                     bool aFixed = i == 0;
                     bool bFixed = i + 1 == last;
                     if (aFixed && bFixed)
                         continue;
+
                     if (aFixed)
                         _cordPoints[i + 1] = new Point(b.X - delta.X * error, b.Y - delta.Y * error);
                     else if (bFixed)
@@ -358,13 +371,6 @@ namespace NovaChat.Client.Views
                     }
                 }
             }
-            double totalSpeed = 0;
-            for (int i = 1; i < last; i++)
-            {
-                Vector velocity = _cordPoints[i] - _cordPointsPrev[i];
-                totalSpeed += velocity.Length / Math.Max(dt, 0.0001);
-            }
-            return totalSpeed;
         }
 
         private void UpdateCordVisual()
@@ -514,7 +520,9 @@ namespace NovaChat.Client.Views
             {
                 LoginButton.IsEnabled = false;
                 var request = new LoginRequest { Id = userId, Password = password };
-                var result = await _apiService.PostAsync<LoginRequest, LoginResponse>("api/User/login", request);
+                var requestToken = lifetimeToken?.Token ?? CancellationToken.None;
+                var result = await _apiService.PostAsync<LoginRequest, LoginResponse>(
+                    "api/User/login", request, requestToken);
                 if (lifetimeToken is null || lifetimeToken.IsCancellationRequested)
                     return;
                 if (result == null || string.IsNullOrWhiteSpace(result.Token))
@@ -536,7 +544,7 @@ namespace NovaChat.Client.Views
                 var isOwner = false;
                 try
                 {
-                    await _apiService.GetAsync<OwnerAccessResponse>("api/Admin/test");
+                    await _apiService.GetAsync<OwnerAccessResponse>("api/Admin/test", requestToken);
                     isOwner = true;
                 }
                 catch (HttpRequestException)
@@ -548,6 +556,10 @@ namespace NovaChat.Client.Views
                     OwnerLoginSuccessful?.Invoke();
                 else
                     LoginSuccessful?.Invoke();
+            }
+            catch (OperationCanceledException) when (lifetimeToken?.IsCancellationRequested == true)
+            {
+                // The login view was closed; do not keep network work running.
             }
             catch (Exception ex)
             {
