@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using NovaChat.Client.Models;
 using NovaChat.Client.Services;
@@ -22,6 +23,10 @@ namespace NovaChat.Client.Views
         private TranslateTransform? _pullTranslate;
         private CancellationTokenSource? _viewCts;
         private StackPanel? _loginContentPanel;
+        private Grid? _loginCardHost;
+        private Border? _loginCardShadowSurface;
+        private DropShadowEffect? _loginCardShadowEffect;
+        private BitmapScalingMode _originalLampScalingMode;
         private bool _lampOn;
         private bool _draggingCord;
         private bool _physicsRunning;
@@ -65,12 +70,17 @@ namespace NovaChat.Client.Views
             InitializeComponent();
             _apiService = new ApiService();
 
-            // These static gradient surfaces only animate opacity. Cache their
-            // rasterized output so WPF can composite them instead of repainting
-            // the gradients on each animation frame.
-            WarmLightOverlay.CacheMode = new BitmapCache();
-            LampGlow.CacheMode = new BitmapCache();
-            LampBulbGlow.CacheMode = new BitmapCache();
+            // These surfaces animate their brushes directly below, so avoid caches
+            // that would be invalidated on every animation frame. The lamp itself
+            // remains cached in XAML for cheap transform-based movement.
+            WarmLightOverlay.CacheMode = null;
+            LampGlow.CacheMode = null;
+            LampBulbGlow.CacheMode = null;
+
+            // The login card contains live text inputs. Never keep the entire
+            // interactive tree in a bitmap cache while the user is typing.
+            LoginCard.CacheMode = null;
+            _originalLampScalingMode = RenderOptions.GetBitmapScalingMode(LampAssembly);
 
             Loaded += LoginView_Loaded;
             Unloaded += LoginView_Unloaded;
@@ -142,6 +152,59 @@ namespace NovaChat.Client.Views
             _loginContentPanel.Children.Clear();
             _loginContentPanel.Children.Add(WelcomeText);
             _loginContentPanel.Children.Add(LoginCard);
+            IsolateLoginCardShadow();
+        }
+
+        private void IsolateLoginCardShadow()
+        {
+            if (_loginCardHost != null ||
+                _loginContentPanel == null ||
+                !ReferenceEquals(LoginCard.Parent, _loginContentPanel))
+                return;
+
+            int index = _loginContentPanel.Children.IndexOf(LoginCard);
+            if (index < 0)
+                return;
+
+            // Keep the card's exact background, border, padding, and shadow, but
+            // render its static surface separately from the live text/password boxes.
+            // Text edits then won't invalidate the expensive shadow render.
+            var shadowSurface = new Border
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                Background = LoginCard.Background,
+                BorderBrush = LoginCard.BorderBrush,
+                BorderThickness = LoginCard.BorderThickness,
+                CornerRadius = LoginCard.CornerRadius,
+                Padding = LoginCard.Padding,
+                Effect = LoginCard.Effect,
+                Opacity = LoginCard.Opacity,
+                CacheMode = new BitmapCache(),
+                IsHitTestVisible = false,
+                Focusable = false,
+                SnapsToDevicePixels = LoginCard.SnapsToDevicePixels
+            };
+
+            _loginCardShadowEffect = shadowSurface.Effect as DropShadowEffect;
+            LoginCard.Effect = null;
+            LoginCard.Background = Brushes.Transparent;
+            LoginCard.BorderBrush = Brushes.Transparent;
+
+            var host = new Grid
+            {
+                Width = _loginContentPanel.Width,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                ClipToBounds = false
+            };
+            host.Children.Add(shadowSurface);
+            _loginContentPanel.Children.RemoveAt(index);
+            host.Children.Add(LoginCard);
+            _loginContentPanel.Children.Insert(index, host);
+
+            _loginCardHost = host;
+            _loginCardShadowSurface = shadowSurface;
         }
 
         private void PositionLampSubtitle()
@@ -236,7 +299,9 @@ namespace NovaChat.Client.Views
             _pullVelocityY = deltaY * 60;
             _pullX = nextX;
             _pullY = nextY;
-            UpdateCordVisual();
+            // PhysicsRendering updates the cord once per display frame. Updating
+            // the same geometry here would make WPF measure/render it twice.
+
         }
 
         private void LampPull_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -261,8 +326,11 @@ namespace NovaChat.Client.Views
 
         private void StartPhysics()
         {
+            RenderOptions.SetBitmapScalingMode(LampAssembly, BitmapScalingMode.LowQuality);
+
             if (_physicsRunning)
                 return;
+
             _physicsRunning = true;
             _physicsClock.Restart();
             CompositionTarget.Rendering += PhysicsRendering;
@@ -270,11 +338,14 @@ namespace NovaChat.Client.Views
 
         private void StopPhysics()
         {
-            if (!_physicsRunning)
-                return;
-            _physicsRunning = false;
-            CompositionTarget.Rendering -= PhysicsRendering;
-            _physicsClock.Stop();
+            if (_physicsRunning)
+            {
+                _physicsRunning = false;
+                CompositionTarget.Rendering -= PhysicsRendering;
+                _physicsClock.Stop();
+            }
+
+            RenderOptions.SetBitmapScalingMode(LampAssembly, _originalLampScalingMode);
         }
 
         private void PhysicsRendering(object? sender, EventArgs e)
@@ -421,18 +492,24 @@ namespace NovaChat.Client.Views
             AnimateBrushColor(LampReflector, Shape.FillProperty, reflectorColor, 280, animate);
             AnimateBrushColor(PullCord, Shape.StrokeProperty, cordColor, 280, animate);
             AnimateBrushColor(LampPull, Shape.FillProperty, pullColor, 280, animate);
-            AnimateOpacity(LampGlow, on ? 1.0 : 0.0, 480, animate);
-            AnimateOpacity(LampBulbGlow, on ? 0.65 : 0.02, 320, animate);
+            // Brush opacity avoids an intermediate, full-surface render target.
+            // This matters most for WarmLightOverlay, which covers the whole window.
+            AnimateBrushOpacity(LampGlow, Shape.FillProperty, on ? 1.0 : 0.0, 480, animate);
+            AnimateBrushOpacity(LampBulbGlow, Shape.FillProperty, on ? 0.65 : 0.02, 320, animate);
             AnimateOpacity(LampReflector, on ? 0.55 : 0.0, 320, animate);
-            AnimateOpacity(WarmLightOverlay, on ? 0.78 : 0.0, 720, animate);
+            AnimateBrushOpacity(WarmLightOverlay, Border.BackgroundProperty, on ? 0.78 : 0.0, 720, animate);
             AnimateOpacity(LoginCard, on ? 1.0 : 0.0, 700, animate);
+            if (_loginCardShadowSurface != null)
+                AnimateOpacity(_loginCardShadowSurface, on ? 1.0 : 0.0, 700, animate);
             AnimateOpacity(WelcomeText, on ? 1.0 : 0.0, 420, animate);
             AnimateOpacity(WelcomeSubText, on ? 0.0 : 1.0, 420, animate);
             LoginCard.IsHitTestVisible = on;
-            AnimateBrushColor(LoginCard, Border.BackgroundProperty, on ? Color.FromRgb(28, 31, 36) : Color.FromRgb(13, 15, 19), 420, animate);
-            AnimateBrushColor(LoginCard, Border.BorderBrushProperty, on ? Color.FromArgb(35, 255, 255, 255) : Color.FromArgb(26, 255, 255, 255), 420, animate);
-            LoginCardShadow.Color = on ? Color.FromRgb(255, 214, 110) : Color.FromRgb(0, 0, 0);
-            LoginCardShadow.Opacity = on ? 0.35 : 0.30;
+            var cardSurface = (DependencyObject?)_loginCardShadowSurface ?? LoginCard;
+            AnimateBrushColor(cardSurface, Border.BackgroundProperty, on ? Color.FromRgb(28, 31, 36) : Color.FromRgb(13, 15, 19), 420, animate);
+            AnimateBrushColor(cardSurface, Border.BorderBrushProperty, on ? Color.FromArgb(35, 255, 255, 255) : Color.FromArgb(26, 255, 255, 255), 420, animate);
+            var cardShadow = _loginCardShadowEffect ?? LoginCardShadow;
+            cardShadow.Color = on ? Color.FromRgb(255, 214, 110) : Color.FromRgb(0, 0, 0);
+            cardShadow.Opacity = on ? 0.35 : 0.30;
             SignInTitle.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
             SignInSubtitle.Foreground = new SolidColorBrush(on ? Color.FromRgb(153, 153, 153) : Color.FromRgb(119, 119, 119));
             WelcomeText.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
@@ -456,6 +533,42 @@ namespace NovaChat.Client.Views
             }
             else
                 target.SetValue(property, new SolidColorBrush(color));
+        }
+
+        private static void AnimateBrushOpacity(
+            DependencyObject target,
+            DependencyProperty brushProperty,
+            double targetOpacity,
+            int milliseconds,
+            bool animate)
+        {
+            if (target.GetValue(brushProperty) is not Brush currentBrush)
+                return;
+
+            Brush brush = currentBrush;
+            if (brush.IsFrozen)
+            {
+                brush = brush.Clone();
+                target.SetValue(brushProperty, brush);
+            }
+
+            if (target is UIElement element)
+                element.Opacity = 1.0;
+
+            if (!animate)
+            {
+                brush.BeginAnimation(Brush.OpacityProperty, null);
+                brush.Opacity = targetOpacity;
+                return;
+            }
+
+            var animation = new DoubleAnimation
+            {
+                To = targetOpacity,
+                Duration = TimeSpan.FromMilliseconds(milliseconds),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
+            brush.BeginAnimation(Brush.OpacityProperty, animation, HandoffBehavior.SnapshotAndReplace);
         }
 
         private static void AnimateOpacity(UIElement element, double target, int milliseconds, bool animate)
