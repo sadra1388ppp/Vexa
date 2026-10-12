@@ -20,6 +20,7 @@ namespace NovaChat.Client.Views
         private readonly Stopwatch _physicsClock = new();
         private PathGeometry? _cordGeometry;
         private PathFigure? _cordFigure;
+        private BezierSegment[]? _cordBezierSegments;
         private TranslateTransform? _pullTranslate;
         private CancellationTokenSource? _viewCts;
         private StackPanel? _loginContentPanel;
@@ -242,8 +243,13 @@ namespace NovaChat.Client.Views
             if (_cordGeometry != null && _cordFigure != null)
                 return;
             _cordFigure = new PathFigure { StartPoint = new Point(CordTopX, CordTopY), IsClosed = false, IsFilled = false };
-            for (int i = 0; i < CordPointCount - 1; i++)
-                _cordFigure.Segments.Add(new BezierSegment { IsStroked = true });
+            _cordBezierSegments = new BezierSegment[CordPointCount - 1];
+            for (int i = 0; i < _cordBezierSegments.Length; i++)
+            {
+                var segment = new BezierSegment { IsStroked = true };
+                _cordBezierSegments[i] = segment;
+                _cordFigure.Segments.Add(segment);
+            }
             _cordGeometry = new PathGeometry();
             _cordGeometry.Figures.Add(_cordFigure);
             PullCord.Data = _cordGeometry;
@@ -416,7 +422,10 @@ namespace NovaChat.Client.Views
 
             // The rope has only seven points; keep the constraint solve compact.
             // Its speed was calculated here previously but never used by the caller.
-            for (int iteration = 0; iteration < CordConstraintIterations; iteration++)
+            // While the pointer is actively moving, two constraint passes keep
+            // the cord responsive. Use the full solve for the natural settling motion.
+            int constraintIterations = _draggingCord ? 2 : CordConstraintIterations;
+            for (int iteration = 0; iteration < constraintIterations; iteration++)
             {
                 _cordPoints[0] = new Point(CordTopX, CordTopY);
                 _cordPoints[last] = new Point(CordTopX + _pullX, RestPullY + _pullY);
@@ -471,7 +480,7 @@ namespace NovaChat.Client.Views
                 Point p3 = _cordPoints[Math.Min(i + 2, last)];
                 Point control1 = new Point(p1.X + (p2.X - p0.X) / 6.0, p1.Y + (p2.Y - p0.Y) / 6.0);
                 Point control2 = new Point(p2.X - (p3.X - p1.X) / 6.0, p2.Y - (p3.Y - p1.Y) / 6.0);
-                var segment = (BezierSegment)_cordFigure.Segments[i];
+                var segment = _cordBezierSegments![i];
                 segment.Point1 = control1;
                 segment.Point2 = control2;
                 segment.Point3 = p2;
