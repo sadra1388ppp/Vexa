@@ -179,7 +179,7 @@ namespace NovaChat.Client.Views
                 CornerRadius = LoginCard.CornerRadius,
                 Padding = LoginCard.Padding,
                 Effect = LoginCard.Effect is DropShadowEffect effect
-                    ? effect.CloneCurrentValue()
+                    ? (DropShadowEffect)effect.CloneCurrentValue()
                     : null,
                 Opacity = LoginCard.Opacity,
                 CacheMode = new BitmapCache(),
@@ -550,7 +550,7 @@ namespace NovaChat.Client.Views
             Brush brush = currentBrush;
             if (brush.IsFrozen)
             {
-                brush = brush.Clone();
+                brush = (Brush)brush.Clone();
                 target.SetValue(brushProperty, brush);
             }
 
