@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using NovaChat.Client.Models;
 using NovaChat.Client.Services;
 
@@ -16,6 +17,8 @@ namespace NovaChat.Client.Views
         private int _registrationInProgress;
         private CancellationTokenSource? _availabilityCts;
         private bool _suppressRegistrationStatusReset;
+        private readonly CancellationTokenSource _viewCts = new();
+        private bool _radialBackdropCached;
 
         public event Action? BackToLoginRequested;
 
@@ -23,28 +26,63 @@ namespace NovaChat.Client.Views
         {
             InitializeComponent();
             _apiService = new ApiService();
+            Loaded += RegisterView_Loaded;
             Unloaded += RegisterView_Unloaded;
         }
 
         private void RegisterView_Unloaded(object sender, RoutedEventArgs e)
         {
+            _viewCts.Cancel();
+
             var pendingCheck = _availabilityCts;
             _availabilityCts = null;
             pendingCheck?.Cancel();
             pendingCheck?.Dispose();
         }
 
+        private void RegisterView_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (_radialBackdropCached)
+                return;
+
+            _radialBackdropCached = true;
+            CacheStaticRadialBackdrops(this);
+        }
+
+        private static void CacheStaticRadialBackdrops(DependencyObject parent)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                // The page's large decorative gradient is static. Cache only that
+                // layer; never cache the editable form controls themselves.
+                if (child is Border border &&
+                    border.Background is RadialGradientBrush &&
+                    border.CacheMode == null)
+                {
+                    border.CacheMode = new BitmapCache();
+                }
+
+                CacheStaticRadialBackdrops(child);
+            }
+        }
+
         private async void UsernameTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!_suppressRegistrationStatusReset)
-                HideRegistrationStatus();
+            if (_suppressRegistrationStatusReset)
+                return;
+
+            HideRegistrationStatus();
             await CheckAvailabilityAsync();
         }
 
         private async void EmailTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!_suppressRegistrationStatusReset)
-                HideRegistrationStatus();
+            if (_suppressRegistrationStatusReset)
+                return;
+
+            HideRegistrationStatus();
             await CheckAvailabilityAsync();
         }
 
@@ -52,8 +90,15 @@ namespace NovaChat.Client.Views
         {
             if (!_suppressRegistrationStatusReset)
                 HideRegistrationStatus();
-            PhoneHintText.Visibility = string.IsNullOrEmpty(PhoneNumberTextBox.Text) ? Visibility.Visible : Visibility.Collapsed;
+
+            PhoneHintText.Visibility = string.IsNullOrEmpty(PhoneNumberTextBox.Text)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
             ValidatePhoneNumber();
+
+            if (_suppressRegistrationStatusReset)
+                return;
+
             await CheckAvailabilityAsync();
         }
 
@@ -87,8 +132,30 @@ namespace NovaChat.Client.Views
         private void ValidatePhoneNumber()
         {
             var phone = PhoneNumberTextBox.Text.Trim();
-            var valid = phone.Length == 11 && phone[0] == '0' && phone.All(ch => ch >= '0' && ch <= '9');
-            PhoneValidationText.Visibility = string.IsNullOrWhiteSpace(phone) || valid ? Visibility.Collapsed : Visibility.Visible;
+            PhoneValidationText.Visibility = string.IsNullOrWhiteSpace(phone) || IsValidPhoneNumber(phone)
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+        }
+
+        private static bool IsValidPhoneNumber(string phone) =>
+            phone.Length == 11 &&
+            phone[0] == '0' &&
+            phone.All(ch => ch >= '0' && ch <= '9');
+
+        private static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                var address = new System.Net.Mail.MailAddress(email);
+                return string.Equals(address.Address, email, StringComparison.OrdinalIgnoreCase);
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
         }
 
         private static string GetProposedText(TextBox box, string insertedText)
@@ -100,11 +167,13 @@ namespace NovaChat.Client.Views
 
         private async System.Threading.Tasks.Task CheckAvailabilityAsync()
         {
-            _availabilityCts?.Cancel();
-            _availabilityCts?.Dispose();
-            _availabilityCts = new CancellationTokenSource();
-            var token = _availabilityCts.Token;
+            var previousCheck = _availabilityCts;
+            var currentCheck = new CancellationTokenSource();
+            _availabilityCts = currentCheck;
+            previousCheck?.Cancel();
+            previousCheck?.Dispose();
 
+            var token = currentCheck.Token;
             var username = UsernameTextBox.Text.Trim();
             var email = EmailTextBox.Text.Trim();
             var phone = PhoneNumberTextBox.Text.Trim();
@@ -113,27 +182,58 @@ namespace NovaChat.Client.Views
             EmailDuplicateText.Visibility = Visibility.Collapsed;
             PhoneDuplicateText.Visibility = Visibility.Collapsed;
 
+            // Avoid network calls for values that cannot yet be submitted.
+            // The endpoint only receives fields that are locally complete.
+            var usernameToCheck = username.Length is >= 3 and <= 32 ? username : string.Empty;
+            var emailToCheck = IsValidEmail(email) ? email : string.Empty;
+            var phoneToCheck = IsValidPhoneNumber(phone) ? phone : string.Empty;
+
+            if (string.IsNullOrWhiteSpace(usernameToCheck) &&
+                string.IsNullOrWhiteSpace(emailToCheck) &&
+                string.IsNullOrWhiteSpace(phoneToCheck))
+            {
+                return;
+            }
+
             try
             {
+                // A short debounce avoids one availability request per keystroke.
                 await System.Threading.Tasks.Task.Delay(350, token);
-                if (token.IsCancellationRequested)
-                    return;
 
-                var query = $"api/User/registration-availability?username={Uri.EscapeDataString(username)}&email={Uri.EscapeDataString(email)}&phoneNumber={Uri.EscapeDataString(phone)}";
+                var query =
+                    $"api/User/registration-availability?username={Uri.EscapeDataString(usernameToCheck)}" +
+                    $"&email={Uri.EscapeDataString(emailToCheck)}" +
+                    $"&phoneNumber={Uri.EscapeDataString(phoneToCheck)}";
+
                 var result = await _apiService.GetAsync<RegistrationAvailabilityResponse>(query, token);
                 if (token.IsCancellationRequested || result == null)
                     return;
 
-                UsernameDuplicateText.Visibility = result.UsernameTaken ? Visibility.Visible : Visibility.Collapsed;
-                EmailDuplicateText.Visibility = result.EmailTaken ? Visibility.Visible : Visibility.Collapsed;
-                PhoneDuplicateText.Visibility = result.PhoneTaken ? Visibility.Visible : Visibility.Collapsed;
-                RegisterButton.IsEnabled = !result.UsernameTaken && !result.EmailTaken && !result.PhoneTaken;
+                UsernameDuplicateText.Visibility =
+                    !string.IsNullOrWhiteSpace(usernameToCheck) && result.UsernameTaken
+                        ? Visibility.Visible
+                        : Visibility.Collapsed;
+                EmailDuplicateText.Visibility =
+                    !string.IsNullOrWhiteSpace(emailToCheck) && result.EmailTaken
+                        ? Visibility.Visible
+                        : Visibility.Collapsed;
+                PhoneDuplicateText.Visibility =
+                    !string.IsNullOrWhiteSpace(phoneToCheck) && result.PhoneTaken
+                        ? Visibility.Visible
+                        : Visibility.Collapsed;
+
+                RegisterButton.IsEnabled =
+                    !( (!string.IsNullOrWhiteSpace(usernameToCheck) && result.UsernameTaken) ||
+                       (!string.IsNullOrWhiteSpace(emailToCheck) && result.EmailTaken) ||
+                       (!string.IsNullOrWhiteSpace(phoneToCheck) && result.PhoneTaken) );
             }
             catch (OperationCanceledException)
             {
+                // Expected when the user types again or leaves the registration page.
             }
-            catch
+            catch (HttpRequestException)
             {
+                // Availability is advisory; registration performs final server validation.
             }
         }
 
@@ -187,7 +287,8 @@ namespace NovaChat.Client.Views
                     AllowGroupAdds = GetRegistrationAllowGroupAdds()
                 };
 
-                var result = await _apiService.PostAsync<RegisterRequest, RegisterResponse>("api/User/register", request);
+                var result = await _apiService.PostAsync<RegisterRequest, RegisterResponse>(
+                    "api/User/register", request, _viewCts.Token);
                 if (result == null)
                 {
                     ShowRegistrationError("Registration failed. Please check the entered information and try again.");
@@ -219,9 +320,13 @@ namespace NovaChat.Client.Views
                 RegistrationMessagePrivacyChanged(this, new RoutedEventArgs());
                 ShowRegistrationSuccess("Your NovaChat account is ready. You can create another account or return to sign in.");
             }
+            catch (OperationCanceledException) when (_viewCts.IsCancellationRequested)
+            {
+                // The registration page was closed; stop its outstanding request.
+            }
             catch (HttpRequestException ex)
             {
-                if (ex.Message.Contains("(409 Conflict)", StringComparison.OrdinalIgnoreCase))
+                if (ex.Message.Contains("(409 Conflict)", StringComparison.OrdinalIgnoreCase)
                 {
                     ShowRegistrationError(ExtractApiMessage(ex.Message));
                     await CheckAvailabilityAsync();
