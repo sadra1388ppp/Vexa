@@ -3,61 +3,39 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              HorizontalAlignment="Stretch"
              VerticalAlignment="Stretch"
-             Background="#0B1118">
+             Background="#0F1115">
     <UserControl.Resources>
-        <Style x:Key="FieldLabel" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="#B8C3D0"/>
-            <Setter Property="FontSize" Value="11.5"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="1,0,0,6"/>
-        </Style>
-
-        <Style x:Key="DuplicateWarning" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="#FF9292"/>
-            <Setter Property="FontSize" Value="10.5"/>
-            <Setter Property="Margin" Value="1,5,0,0"/>
-            <Setter Property="TextWrapping" Value="Wrap"/>
-            <Setter Property="Visibility" Value="Collapsed"/>
-        </Style>
-
-        <Style x:Key="PhoneHint" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="#6F7F90"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Margin" Value="14,0,0,0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="IsHitTestVisible" Value="False"/>
-        </Style>
-
-        <Style x:Key="GlassTextBox" TargetType="{x:Type TextBox}">
-            <Setter Property="Height" Value="45"/>
-            <Setter Property="Padding" Value="13,0"/>
-            <Setter Property="Foreground" Value="#F4F6F9"/>
-            <Setter Property="Background" Value="#0D141D"/>
-            <Setter Property="BorderBrush" Value="#2B3949"/>
+        <Style x:Key="GlassTextBox" TargetType="TextBox">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="#18FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#35FFFFFF"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="CaretBrush" Value="#D4A373"/>
-            <Setter Property="SelectionBrush" Value="#665C4533"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="CaretBrush" Value="#FFFFFF"/>
+            <Setter Property="SelectionBrush" Value="#66D4A373"/>
+            <Setter Property="SelectionTextBrush" Value="#FFFFFF"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TextBox}">
-                        <Border x:Name="FieldBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="1,0" VerticalAlignment="Center"/>
-                        </Border>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid>
+                            <Border x:Name="Box" CornerRadius="14" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="0" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border x:Name="FocusGlow" CornerRadius="14" BorderBrush="#00D4A373" BorderThickness="1" IsHitTestVisible="False"/>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="FieldBorder" Property="BorderBrush" Value="#46586B"/>
+                                <Setter TargetName="Box" Property="Background" Value="#25FFFFFF"/>
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#90FFFFFF"/>
+                                <Setter TargetName="FocusGlow" Property="BorderBrush" Value="#45D4A373"/>
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="FieldBorder" Property="BorderBrush" Value="#D4A373"/>
-                                <Setter TargetName="FieldBorder" Property="Background" Value="#111B27"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="FieldBorder" Property="Opacity" Value="0.55"/>
+                                <Setter TargetName="Box" Property="Background" Value="#30FFFFFF"/>
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#FFD4A373"/>
+                                <Setter TargetName="FocusGlow" Property="BorderBrush" Value="#90D4A373"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -65,35 +43,35 @@
             </Setter>
         </Style>
 
-        <Style x:Key="GlassPasswordBox" TargetType="{x:Type PasswordBox}">
-            <Setter Property="Height" Value="45"/>
-            <Setter Property="Padding" Value="13,0"/>
-            <Setter Property="Foreground" Value="#F4F6F9"/>
-            <Setter Property="Background" Value="#0D141D"/>
-            <Setter Property="BorderBrush" Value="#2B3949"/>
+        <Style x:Key="GlassPasswordBox" TargetType="PasswordBox">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="#18FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#35FFFFFF"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="CaretBrush" Value="#D4A373"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="CaretBrush" Value="#FFFFFF"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type PasswordBox}">
-                        <Border x:Name="FieldBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="1,0" VerticalAlignment="Center"/>
-                        </Border>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Grid>
+                            <Border x:Name="Box" CornerRadius="14" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="0" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border x:Name="FocusGlow" CornerRadius="14" BorderBrush="#00D4A373" BorderThickness="1" IsHitTestVisible="False"/>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="FieldBorder" Property="BorderBrush" Value="#46586B"/>
+                                <Setter TargetName="Box" Property="Background" Value="#25FFFFFF"/>
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#90FFFFFF"/>
+                                <Setter TargetName="FocusGlow" Property="BorderBrush" Value="#45D4A373"/>
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="FieldBorder" Property="BorderBrush" Value="#D4A373"/>
-                                <Setter TargetName="FieldBorder" Property="Background" Value="#111B27"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="FieldBorder" Property="Opacity" Value="0.55"/>
+                                <Setter TargetName="Box" Property="Background" Value="#30FFFFFF"/>
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#FFD4A373"/>
+                                <Setter TargetName="FocusGlow" Property="BorderBrush" Value="#90D4A373"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -101,40 +79,35 @@
             </Setter>
         </Style>
 
-        <Style x:Key="PrivacyRadioButton" TargetType="{x:Type RadioButton}">
-            <Setter Property="Foreground" Value="#E7ECF2"/>
-            <Setter Property="FontSize" Value="12"/>
+        <Style x:Key="PrivacyRadioButton" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="12.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="0,0,0,7"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type RadioButton}">
-                        <Border x:Name="Surface" Padding="11" CornerRadius="10"
-                                Background="#101923" BorderBrush="#273747" BorderThickness="1">
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Surface" Padding="12" CornerRadius="12" Background="#10FFFFFF" BorderBrush="#28FFFFFF" BorderThickness="1">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="25"/>
+                                    <ColumnDefinition Width="24"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Border x:Name="RadioRing" Width="17" Height="17" CornerRadius="9"
-                                        BorderBrush="#738194" BorderThickness="1.5"
-                                        VerticalAlignment="Top" HorizontalAlignment="Left">
-                                    <Ellipse x:Name="Dot" Width="7" Height="7" Fill="#D4A373"
-                                             Visibility="Collapsed" HorizontalAlignment="Center"
-                                             VerticalAlignment="Center"/>
+                                <Border Width="18" Height="18" CornerRadius="9" BorderBrush="#7F8792" BorderThickness="1.5" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                    <Ellipse x:Name="Dot" Width="8" Height="8" Fill="#D4A373" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <ContentPresenter Grid.Column="1" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Surface" Property="BorderBrush" Value="#596477"/>
+                                <Setter TargetName="Surface" Property="Background" Value="#18FFFFFF"/>
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="#55D4A373"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="#1B2937"/>
-                                <Setter TargetName="Surface" Property="BorderBrush" Value="#D4A373"/>
-                                <Setter TargetName="RadioRing" Property="BorderBrush" Value="#D4A373"/>
+                                <Setter TargetName="Surface" Property="Background" Value="#22D4A373"/>
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="#FFD4A373"/>
                                 <Setter TargetName="Dot" Property="Visibility" Value="Visible"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -143,30 +116,32 @@
             </Setter>
         </Style>
 
-        <Style x:Key="GlassCreateButton" TargetType="{x:Type Button}">
-            <Setter Property="Height" Value="48"/>
-            <Setter Property="Foreground" Value="#151A20"/>
+        <Style x:Key="GlassCreateButton" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Background" Value="#D4A373"/>
             <Setter Property="BorderBrush" Value="#E8C79C"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="13.5"/>
-            <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="Surface" Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Surface" CornerRadius="16" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <Border CornerRadius="15" Margin="1" Background="#18FFFFFF" BorderBrush="#24FFFFFF" BorderThickness="1"/>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="#E4B98D"/>
-                                <Setter TargetName="Surface" Property="BorderBrush" Value="#F3DCC0"/>
+                                <Setter TargetName="Surface" Property="Background" Value="#E5B98E"/>
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="#FFF4E6"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="#BD895D"/>
+                                <Setter TargetName="Surface" Property="Background" Value="#B98253"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="Surface" Property="Opacity" Value="0.45"/>
@@ -177,233 +152,156 @@
             </Setter>
         </Style>
 
-        <Style x:Key="GlassBackButton" TargetType="{x:Type Button}">
-            <Setter Property="Height" Value="38"/>
+        <Style x:Key="GlassBackButton" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Foreground" Value="#D4A373"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="12"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="Surface" Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="9">
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Surface" CornerRadius="10" Padding="10,6" Background="Transparent">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="#1CD4A373"/>
-                                <Setter Property="Foreground" Value="#F1D5B5"/>
+                                <Setter TargetName="Surface" Property="Background" Value="#25D4A373"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#E4E6EA"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,7"/>
+        </Style>
+
+        <Style x:Key="DuplicateWarning" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FF7A7A"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
+
+        <Style x:Key="PhoneHint" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#9EA5B1"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="15,0,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
     </UserControl.Resources>
 
-    <Grid Background="#0B1118">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.82*"/>
-            <ColumnDefinition Width="1.18*"/>
-        </Grid.ColumnDefinitions>
+    <Grid Background="#0F1115">
+        <Border IsHitTestVisible="False" Opacity="0.55">
+            <Border.Background>
+                <RadialGradientBrush Center="0.22,0.40" GradientOrigin="0.22,0.40" RadiusX="0.72" RadiusY="0.82">
+                    <GradientStop Color="#35FFD66E" Offset="0"/>
+                    <GradientStop Color="#14FFD66E" Offset="0.35"/>
+                    <GradientStop Color="#00FFD66E" Offset="1"/>
+                </RadialGradientBrush>
+            </Border.Background>
+        </Border>
 
-        <Grid Grid.Column="0" Margin="34,28,20,28">
-            <StackPanel VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="54" Height="54" CornerRadius="16" Background="#D4A373">
-                        <TextBlock Text="V" FontSize="31" FontWeight="Bold" Foreground="#121820"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <StackPanel Margin="13,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="VEXA" FontSize="21" FontWeight="Bold" Foreground="#F5F7FA"/>
-                        <TextBlock Text="MESSAGING, REIMAGINED" FontSize="9" FontWeight="Bold"
-                                   Foreground="#D4A373" Margin="1,4,0,0"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <TextBlock Text="Make room for&#10;better conversations."
-                           FontSize="32" FontWeight="SemiBold" LineHeight="39"
-                           Foreground="#F5F7FA" TextWrapping="Wrap" Margin="0,36,0,13"/>
-                <TextBlock Text="Create your profile and make Vexa feel like yours."
-                           FontSize="13" LineHeight="21" Foreground="#AAB7C5"
-                           TextWrapping="Wrap" MaxWidth="335"/>
-
-                <Border Height="1" Background="#263443" Margin="0,25,0,22"/>
-
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <Border Width="32" Height="32" CornerRadius="9" Background="#1B2937">
-                        <TextBlock Text="1" FontSize="12" FontWeight="Bold" Foreground="#D4A373"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="Set up your profile" FontSize="12" FontWeight="SemiBold" Foreground="#E7ECF2"/>
-                        <TextBlock Text="Choose how people find you." FontSize="10.5" Foreground="#8594A4" Margin="0,3,0,0"/>
-                    </StackPanel>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <Border Width="32" Height="32" CornerRadius="9" Background="#1B2937">
-                        <TextBlock Text="2" FontSize="12" FontWeight="Bold" Foreground="#D4A373"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="Set your preferences" FontSize="12" FontWeight="SemiBold" Foreground="#E7ECF2"/>
-                        <TextBlock Text="Control messages and group invites." FontSize="10.5" Foreground="#8594A4" Margin="0,3,0,0"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <Border Background="#111A24" BorderBrush="#273747" BorderThickness="1"
-                        CornerRadius="12" Padding="14" Margin="0,12,0,0">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid MinHeight="860" Margin="24,34">
+                <Border Width="560" Padding="40" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#1CFFFFFF" BorderBrush="#3AFFFFFF" BorderThickness="1" CornerRadius="30">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="12" Opacity="0.38"/>
+                    </Border.Effect>
                     <StackPanel>
-                        <TextBlock Text="YOUR PRIVACY, YOUR CHOICE" FontSize="9.5"
-                                   FontWeight="Bold" Foreground="#D4A373"/>
-                        <TextBlock Text="Decide who can start conversations with you and whether others can add you to groups."
-                                   FontSize="11" LineHeight="17" Foreground="#AAB7C5"
-                                   TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        <Border Width="64" Height="64" CornerRadius="20" Background="#D4A373" HorizontalAlignment="Center">
+                            <TextBlock Text="V" Foreground="White" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Create your Vexa account" FontSize="29" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,20,0,7" TextAlignment="Center"/>
+                        <TextBlock Text="Set up your profile and start chatting in one place." FontSize="13" Foreground="#BFC3CA" HorizontalAlignment="Center" Margin="0,0,0,26" TextWrapping="Wrap" TextAlignment="Center"/>
+
+                        <TextBlock Text="Username" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="UsernameTextBox" Style="{StaticResource GlassTextBox}" Height="48" TextChanged="UsernameTextBox_TextChanged"/>
+                        <TextBlock x:Name="UsernameDuplicateText" Text="This username is already taken." Style="{StaticResource DuplicateWarning}"/>
+                        <TextBlock Text="Use 3–32 letters, numbers, dot, underscore or hyphen." Foreground="#9097A3" FontSize="10.5" Margin="0,5,0,15"/>
+
+                        <TextBlock Text="Password" Style="{StaticResource FieldLabel}"/>
+                        <PasswordBox x:Name="PasswordBox" Style="{StaticResource GlassPasswordBox}" Height="48" Margin="0,0,0,15"/>
+
+                        <TextBlock Text="Display Name" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="DisplayNameTextBox" Style="{StaticResource GlassTextBox}" Height="48" Margin="0,0,0,15"/>
+
+                        <TextBlock Text="Email" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="EmailTextBox" Style="{StaticResource GlassTextBox}" Height="48" TextChanged="EmailTextBox_TextChanged"/>
+                        <TextBlock x:Name="EmailDuplicateText" Text="This email is already registered." Style="{StaticResource DuplicateWarning}"/>
+                        <Border Height="15" Background="Transparent"/>
+
+                        <TextBlock Text="Phone Number" Style="{StaticResource FieldLabel}"/>
+                        <Grid>
+                            <TextBox x:Name="PhoneNumberTextBox" Style="{StaticResource GlassTextBox}" Height="48" PreviewTextInput="PhoneNumberTextBox_PreviewTextInput" TextChanged="PhoneNumberTextBox_TextChanged" DataObject.Pasting="PhoneNumberTextBox_Pasting"/>
+                            <TextBlock x:Name="PhoneHintText" Text="09987654321" Style="{StaticResource PhoneHint}"/>
+                        </Grid>
+                        <TextBlock x:Name="PhoneDuplicateText" Text="This phone number is already registered." Style="{StaticResource DuplicateWarning}"/>
+                        <TextBlock x:Name="PhoneValidationText" Text="Phone number must contain exactly 11 digits and start with 0." Style="{StaticResource DuplicateWarning}"/>
+
+                        <TextBlock Text="Privacy" Foreground="#E4E6EA" FontSize="12" FontWeight="SemiBold" Margin="0,21,0,9"/>
+                        <Border Padding="14" Background="#15FFFFFF" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="15" Margin="0,0,0,9">
+                            <StackPanel>
+                                <TextBlock Text="Who can message you?" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                                <TextBlock x:Name="RegistrationMessagePrivacyDescription" Text="Anyone can start a conversation with you directly." FontSize="10.5" Foreground="#BFC3CA" Margin="0,5,0,12" TextWrapping="Wrap"/>
+
+                                <RadioButton x:Name="RegistrationMessageEverybodyRadio" GroupName="RegistrationMessagePrivacy" IsChecked="True" Style="{StaticResource PrivacyRadioButton}" Checked="RegistrationMessagePrivacyChanged">
+                                    <StackPanel>
+                                        <TextBlock Text="Everyone"/>
+                                        <TextBlock Text="New people can message you directly." FontSize="10.5" FontWeight="Normal" Foreground="#AEB5BF" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton x:Name="RegistrationMessageRequestsRadio" GroupName="RegistrationMessagePrivacy" Style="{StaticResource PrivacyRadioButton}" Checked="RegistrationMessagePrivacyChanged">
+                                    <StackPanel>
+                                        <TextBlock Text="People you approve"/>
+                                        <TextBlock Text="New conversations arrive as requests until you approve them." FontSize="10.5" FontWeight="Normal" Foreground="#AEB5BF" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <TextBlock x:Name="RegistrationMessagePrivacyStatus" Text="Everyone can message you" FontSize="10.5" Foreground="#D4A373" FontWeight="SemiBold" Margin="0,1,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Padding="14" Background="#15FFFFFF" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="15">
+                            <CheckBox x:Name="RegistrationAllowGroupAddsBox" IsChecked="True" Foreground="#FFFFFF">
+                                <StackPanel Margin="8,0,0,0">
+                                    <TextBlock Text="Allow other people to add me to groups" FontSize="13" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Turn this off to prevent direct group additions." FontSize="10.5" Foreground="#BFC3CA" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </CheckBox>
+                        </Border>
+
+                        <Border x:Name="RegistrationSuccessCard" Visibility="Collapsed" Padding="14" Background="#182F8F46" BorderBrush="#6089E6A7" BorderThickness="1" CornerRadius="15" Margin="0,17,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="34" Height="34" CornerRadius="17" Background="#3A89E6A7" VerticalAlignment="Top" Margin="0,0,11,0">
+                                    <TextBlock Text="✓" Foreground="#89E6A7" FontSize="19" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Account created successfully" Foreground="#B7F3C8" FontSize="13.5" FontWeight="Bold"/>
+                                    <TextBlock x:Name="RegistrationSuccessTextBlock" Text="Your Vexa account is ready." Foreground="#BDE7C8" FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock x:Name="RegistrationErrorTextBlock" Visibility="Collapsed" Foreground="#FF7A7A" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Center" Margin="0,17,0,0"/>
+
+                        <Button x:Name="RegisterButton" Content="Create account" Height="52" Margin="0,18,0,0" Style="{StaticResource GlassCreateButton}" IsDefault="True" Click="RegisterButton_Click"/>
+                        <TextBlock Text="Already have an account?" HorizontalAlignment="Center" Foreground="#9FA4AE" Margin="0,22,0,4"/>
+                        <Button Content="Back to sign in" Height="38" Style="{StaticResource GlassBackButton}" Click="BackToLoginButton_Click"/>
                     </StackPanel>
                 </Border>
-            </StackPanel>
-        </Grid>
-
-        <ScrollViewer Grid.Column="1"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled"
-                      Padding="10,18">
-            <Border MaxWidth="610"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Margin="0,0,0,18"
-                    Padding="27"
-                    Background="#121C27"
-                    BorderBrush="#2B3A4A"
-                    BorderThickness="1"
-                    CornerRadius="20">
-                <StackPanel>
-                    <TextBlock Text="Create account" FontSize="25" FontWeight="SemiBold"
-                               Foreground="#F5F7FA"/>
-                    <TextBlock Text="It only takes a few details to get started."
-                               FontSize="11.5" Foreground="#9DABBA" Margin="0,6,0,22"/>
-
-                    <TextBlock Text="USERNAME" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="UsernameTextBox" Style="{StaticResource GlassTextBox}"
-                             MaxLength="32" TextChanged="UsernameTextBox_TextChanged"/>
-                    <TextBlock x:Name="UsernameDuplicateText" Text="This username is already taken."
-                               Style="{StaticResource DuplicateWarning}"/>
-                    <TextBlock Text="Use 3–32 characters: letters, numbers, dot, underscore or hyphen."
-                               Foreground="#8190A0" FontSize="10" TextWrapping="Wrap" Margin="1,5,0,14"/>
-
-                    <TextBlock Text="PASSWORD" Style="{StaticResource FieldLabel}"/>
-                    <PasswordBox x:Name="PasswordBox" Style="{StaticResource GlassPasswordBox}"
-                                 MaxLength="100" PasswordChanged="PasswordBox_PasswordChanged"
-                                 Margin="0,0,0,14"/>
-
-                    <TextBlock Text="DISPLAY NAME" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="DisplayNameTextBox" Style="{StaticResource GlassTextBox}"
-                             MaxLength="50" TextChanged="DisplayNameTextBox_TextChanged"
-                             Margin="0,0,0,14"/>
-
-                    <TextBlock Text="EMAIL" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="EmailTextBox" Style="{StaticResource GlassTextBox}"
-                             MaxLength="254" TextChanged="EmailTextBox_TextChanged"/>
-                    <TextBlock x:Name="EmailDuplicateText" Text="This email is already registered."
-                               Style="{StaticResource DuplicateWarning}"/>
-                    <Border Height="13" Background="Transparent"/>
-
-                    <TextBlock Text="PHONE NUMBER" Style="{StaticResource FieldLabel}"/>
-                    <Grid>
-                        <TextBox x:Name="PhoneNumberTextBox" Style="{StaticResource GlassTextBox}"
-                                 MaxLength="11" PreviewTextInput="PhoneNumberTextBox_PreviewTextInput"
-                                 TextChanged="PhoneNumberTextBox_TextChanged"
-                                 DataObject.Pasting="PhoneNumberTextBox_Pasting"/>
-                        <TextBlock x:Name="PhoneHintText" Text="09987654321" Style="{StaticResource PhoneHint}"/>
-                    </Grid>
-                    <TextBlock x:Name="PhoneDuplicateText" Text="This phone number is already registered."
-                               Style="{StaticResource DuplicateWarning}"/>
-                    <TextBlock x:Name="PhoneValidationText"
-                               Text="Phone number must contain exactly 11 digits and start with 0."
-                               Style="{StaticResource DuplicateWarning}"/>
-
-                    <TextBlock Text="PRIVACY PREFERENCES" Foreground="#E4E9EF" FontSize="11"
-                               FontWeight="Bold" Margin="0,22,0,9"/>
-                    <Border Padding="13" Background="#0F1721" BorderBrush="#273747"
-                            BorderThickness="1" CornerRadius="12" Margin="0,0,0,9">
-                        <StackPanel>
-                            <TextBlock Text="Who can message you?" FontSize="13"
-                                       FontWeight="SemiBold" Foreground="#F5F7FA"/>
-                            <TextBlock x:Name="RegistrationMessagePrivacyDescription"
-                                       Text="Anyone can start a conversation with you directly."
-                                       FontSize="10.5" Foreground="#AAB7C5"
-                                       TextWrapping="Wrap" Margin="0,5,0,11"/>
-
-                            <RadioButton x:Name="RegistrationMessageEverybodyRadio"
-                                         GroupName="RegistrationMessagePrivacy" IsChecked="True"
-                                         Style="{StaticResource PrivacyRadioButton}"
-                                         Checked="RegistrationMessagePrivacyChanged">
-                                <StackPanel>
-                                    <TextBlock Text="Everyone"/>
-                                    <TextBlock Text="New people can message you directly."
-                                               FontSize="10.5" FontWeight="Normal"
-                                               Foreground="#9DABBA" Margin="0,3,0,0"/>
-                                </StackPanel>
-                            </RadioButton>
-                            <RadioButton x:Name="RegistrationMessageRequestsRadio"
-                                         GroupName="RegistrationMessagePrivacy"
-                                         Style="{StaticResource PrivacyRadioButton}"
-                                         Checked="RegistrationMessagePrivacyChanged">
-                                <StackPanel>
-                                    <TextBlock Text="People you approve"/>
-                                    <TextBlock Text="New conversations arrive as requests until you approve them."
-                                               FontSize="10.5" FontWeight="Normal"
-                                               Foreground="#9DABBA" TextWrapping="Wrap" Margin="0,3,0,0"/>
-                                </StackPanel>
-                            </RadioButton>
-                            <TextBlock x:Name="RegistrationMessagePrivacyStatus"
-                                       Text="Everyone can message you" FontSize="10.5"
-                                       Foreground="#D4A373" FontWeight="SemiBold" Margin="0,2,0,0"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Padding="13" Background="#0F1721" BorderBrush="#273747"
-                            BorderThickness="1" CornerRadius="12">
-                        <CheckBox x:Name="RegistrationAllowGroupAddsBox" IsChecked="True"
-                                  Foreground="#F5F7FA">
-                            <StackPanel Margin="7,0,0,0">
-                                <TextBlock Text="Allow group invitations" FontSize="12.5" FontWeight="SemiBold"/>
-                                <TextBlock Text="You can turn this off to prevent people adding you directly to groups."
-                                           FontSize="10.5" Foreground="#9DABBA" TextWrapping="Wrap" Margin="0,4,0,0"/>
-                            </StackPanel>
-                        </CheckBox>
-                    </Border>
-
-                    <Border x:Name="RegistrationSuccessCard" Visibility="Collapsed"
-                            Padding="13" Background="#14283B2C" BorderBrush="#4775B982"
-                            BorderThickness="1" CornerRadius="11" Margin="0,16,0,0">
-                        <StackPanel>
-                            <TextBlock Text="Account created successfully" Foreground="#B7F3C8"
-                                       FontSize="12.5" FontWeight="Bold"/>
-                            <TextBlock x:Name="RegistrationSuccessTextBlock"
-                                       Text="Your Vexa account is ready."
-                                       Foreground="#BDE7C8" FontSize="11"
-                                       TextWrapping="Wrap" Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </Border>
-
-                    <TextBlock x:Name="RegistrationErrorTextBlock" Visibility="Collapsed"
-                               Foreground="#FF9292" FontSize="11.5" TextWrapping="Wrap"
-                               Margin="1,15,1,0"/>
-
-                    <Button x:Name="RegisterButton" Content="Create account"
-                            Style="{StaticResource GlassCreateButton}" IsEnabled="False"
-                            Margin="0,17,0,0" IsDefault="True" Click="RegisterButton_Click"/>
-                    <TextBlock Text="Already have an account?" HorizontalAlignment="Center"
-                               Foreground="#9DABBA" FontSize="11" Margin="0,18,0,3"/>
-                    <Button Content="Back to sign in" Style="{StaticResource GlassBackButton}"
-                            Click="BackToLoginButton_Click"/>
-                </StackPanel>
-            </Border>
+            </Grid>
         </ScrollViewer>
     </Grid>
 </UserControl>
