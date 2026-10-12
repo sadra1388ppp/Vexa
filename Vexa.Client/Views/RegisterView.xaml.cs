@@ -20,6 +20,15 @@ namespace NovaChat.Client.Views
         private bool _suppressRegistrationStatusReset;
         private readonly CancellationTokenSource _viewCts = new();
         private bool _radialBackdropCached;
+
+        // Keep advisory availability results for the current field values so
+        // typing into one field does not repeatedly recheck the other fields.
+        private string? _lastCheckedUsername;
+        private string? _lastCheckedEmail;
+        private string? _lastCheckedPhone;
+        private bool _lastUsernameTaken;
+        private bool _lastEmailTaken;
+        private bool _lastPhoneTaken;
         private Border? _registrationShadowSurface;
 
         public event Action? BackToLoginRequested;
@@ -36,10 +45,7 @@ namespace NovaChat.Client.Views
         {
             _viewCts.Cancel();
 
-            var pendingCheck = _availabilityCts;
-            _availabilityCts = null;
-            pendingCheck?.Cancel();
-            pendingCheck?.Dispose();
+            CancelAvailabilityCheck();
         }
 
         private void RegisterView_Loaded(object sender, RoutedEventArgs e)
@@ -247,74 +253,157 @@ namespace NovaChat.Client.Views
 
         private async System.Threading.Tasks.Task CheckAvailabilityAsync()
         {
-            var previousCheck = _availabilityCts;
-            var currentCheck = new CancellationTokenSource();
-            _availabilityCts = currentCheck;
-            previousCheck?.Cancel();
-            previousCheck?.Dispose();
+            CancelAvailabilityCheck();
 
-            var token = currentCheck.Token;
             var username = UsernameTextBox.Text.Trim();
             var email = EmailTextBox.Text.Trim();
             var phone = PhoneNumberTextBox.Text.Trim();
 
-            UsernameDuplicateText.Visibility = Visibility.Collapsed;
-            EmailDuplicateText.Visibility = Visibility.Collapsed;
-            PhoneDuplicateText.Visibility = Visibility.Collapsed;
-
-            // Avoid network calls for values that cannot yet be submitted.
-            // The endpoint only receives fields that are locally complete.
+            // Do not ask the server about partial values. Also avoid asking again
+            // for field values that have already been checked successfully.
             var usernameToCheck = username.Length is >= 3 and <= 32 ? username : string.Empty;
             var emailToCheck = IsValidEmail(email) ? email : string.Empty;
             var phoneToCheck = IsValidPhoneNumber(phone) ? phone : string.Empty;
 
-            if (string.IsNullOrWhiteSpace(usernameToCheck) &&
-                string.IsNullOrWhiteSpace(emailToCheck) &&
-                string.IsNullOrWhiteSpace(phoneToCheck))
-            {
+            bool checkUsername =
+                !string.IsNullOrWhiteSpace(usernameToCheck) &&
+                !string.Equals(usernameToCheck, _lastCheckedUsername, StringComparison.OrdinalIgnoreCase);
+            bool checkEmail =
+                !string.IsNullOrWhiteSpace(emailToCheck) &&
+                !string.Equals(emailToCheck, _lastCheckedEmail, StringComparison.OrdinalIgnoreCase);
+            bool checkPhone =
+                !string.IsNullOrWhiteSpace(phoneToCheck) &&
+                !string.Equals(phoneToCheck, _lastCheckedPhone, StringComparison.Ordinal);
+
+            // Show the cached warning only when it belongs to the exact value
+            // currently visible in the field.
+            UsernameDuplicateText.Visibility =
+                !string.IsNullOrWhiteSpace(usernameToCheck) &&
+                string.Equals(usernameToCheck, _lastCheckedUsername, StringComparison.OrdinalIgnoreCase) &&
+                _lastUsernameTaken
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            EmailDuplicateText.Visibility =
+                !string.IsNullOrWhiteSpace(emailToCheck) &&
+                string.Equals(emailToCheck, _lastCheckedEmail, StringComparison.OrdinalIgnoreCase) &&
+                _lastEmailTaken
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            PhoneDuplicateText.Visibility =
+                !string.IsNullOrWhiteSpace(phoneToCheck) &&
+                string.Equals(phoneToCheck, _lastCheckedPhone, StringComparison.Ordinal) &&
+                _lastPhoneTaken
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+
+            UpdateRegisterButtonFromCachedAvailability();
+
+            if (!checkUsername && !checkEmail && !checkPhone)
                 return;
-            }
+
+            var currentCheck = new CancellationTokenSource();
+            _availabilityCts = currentCheck;
+            var token = currentCheck.Token;
 
             try
             {
-                // A short debounce avoids one availability request per keystroke.
+                // Coalesce typing into a single availability request.
                 await System.Threading.Tasks.Task.Delay(350, token);
 
                 var query =
-                    $"api/User/registration-availability?username={Uri.EscapeDataString(usernameToCheck)}" +
-                    $"&email={Uri.EscapeDataString(emailToCheck)}" +
-                    $"&phoneNumber={Uri.EscapeDataString(phoneToCheck)}";
+                    $"api/User/registration-availability?username={Uri.EscapeDataString(checkUsername ? usernameToCheck : string.Empty)}" +
+                    $"&email={Uri.EscapeDataString(checkEmail ? emailToCheck : string.Empty)}" +
+                    $"&phoneNumber={Uri.EscapeDataString(checkPhone ? phoneToCheck : string.Empty)}";
 
                 var result = await _apiService.GetAsync<RegistrationAvailabilityResponse>(query, token);
-                if (token.IsCancellationRequested || result == null)
+                if (token.IsCancellationRequested ||
+                    !ReferenceEquals(_availabilityCts, currentCheck) ||
+                    result == null)
+                {
                     return;
+                }
+
+                if (checkUsername)
+                {
+                    _lastCheckedUsername = usernameToCheck;
+                    _lastUsernameTaken = result.UsernameTaken;
+                }
+
+                if (checkEmail)
+                {
+                    _lastCheckedEmail = emailToCheck;
+                    _lastEmailTaken = result.EmailTaken;
+                }
+
+                if (checkPhone)
+                {
+                    _lastCheckedPhone = phoneToCheck;
+                    _lastPhoneTaken = result.PhoneTaken;
+                }
 
                 UsernameDuplicateText.Visibility =
-                    !string.IsNullOrWhiteSpace(usernameToCheck) && result.UsernameTaken
+                    !string.IsNullOrWhiteSpace(usernameToCheck) &&
+                    string.Equals(usernameToCheck, _lastCheckedUsername, StringComparison.OrdinalIgnoreCase) &&
+                    _lastUsernameTaken
                         ? Visibility.Visible
                         : Visibility.Collapsed;
                 EmailDuplicateText.Visibility =
-                    !string.IsNullOrWhiteSpace(emailToCheck) && result.EmailTaken
+                    !string.IsNullOrWhiteSpace(emailToCheck) &&
+                    string.Equals(emailToCheck, _lastCheckedEmail, StringComparison.OrdinalIgnoreCase) &&
+                    _lastEmailTaken
                         ? Visibility.Visible
                         : Visibility.Collapsed;
                 PhoneDuplicateText.Visibility =
-                    !string.IsNullOrWhiteSpace(phoneToCheck) && result.PhoneTaken
+                    !string.IsNullOrWhiteSpace(phoneToCheck) &&
+                    string.Equals(phoneToCheck, _lastCheckedPhone, StringComparison.Ordinal) &&
+                    _lastPhoneTaken
                         ? Visibility.Visible
                         : Visibility.Collapsed;
 
-                RegisterButton.IsEnabled =
-                    !( (!string.IsNullOrWhiteSpace(usernameToCheck) && result.UsernameTaken) ||
-                       (!string.IsNullOrWhiteSpace(emailToCheck) && result.EmailTaken) ||
-                       (!string.IsNullOrWhiteSpace(phoneToCheck) && result.PhoneTaken) );
+                UpdateRegisterButtonFromCachedAvailability();
             }
             catch (OperationCanceledException)
             {
-                // Expected when the user types again or leaves the registration page.
+                // Expected when a newer value arrives or the view is closed.
             }
             catch (HttpRequestException)
             {
-                // Availability is advisory; registration performs final server validation.
+                // Availability is advisory; registration performs final validation.
             }
+            finally
+            {
+                if (ReferenceEquals(_availabilityCts, currentCheck))
+                    _availabilityCts = null;
+
+                currentCheck.Dispose();
+            }
+        }
+
+        private void CancelAvailabilityCheck()
+        {
+            var pending = _availabilityCts;
+            _availabilityCts = null;
+
+            if (pending == null)
+                return;
+
+            pending.Cancel();
+            pending.Dispose();
+        }
+
+        private void UpdateRegisterButtonFromCachedAvailability()
+        {
+            bool usernameTaken = !string.IsNullOrWhiteSpace(UsernameTextBox.Text) &&
+                string.Equals(UsernameTextBox.Text.Trim(), _lastCheckedUsername, StringComparison.OrdinalIgnoreCase) &&
+                _lastUsernameTaken;
+            bool emailTaken = !string.IsNullOrWhiteSpace(EmailTextBox.Text) &&
+                string.Equals(EmailTextBox.Text.Trim(), _lastCheckedEmail, StringComparison.OrdinalIgnoreCase) &&
+                _lastEmailTaken;
+            bool phoneTaken = !string.IsNullOrWhiteSpace(PhoneNumberTextBox.Text) &&
+                string.Equals(PhoneNumberTextBox.Text.Trim(), _lastCheckedPhone, StringComparison.Ordinal) &&
+                _lastPhoneTaken;
+
+            RegisterButton.IsEnabled = !usernameTaken && !emailTaken && !phoneTaken;
         }
 
         private async void RegisterButton_Click(object sender, RoutedEventArgs e)
@@ -324,10 +413,7 @@ namespace NovaChat.Client.Views
 
             // Registration is the final uniqueness check; cancel any advisory
             // request so it cannot compete with or overwrite the submit flow.
-            var pendingAvailability = _availabilityCts;
-            _availabilityCts = null;
-            pendingAvailability?.Cancel();
-            pendingAvailability?.Dispose();
+            CancelAvailabilityCheck();
 
             var username = UsernameTextBox.Text.Trim();
             var displayName = DisplayNameTextBox.Text.Trim();
@@ -405,6 +491,14 @@ namespace NovaChat.Client.Views
                 }
 
                 RegistrationMessagePrivacyChanged(this, new RoutedEventArgs());
+
+                _lastCheckedUsername = null;
+                _lastCheckedEmail = null;
+                _lastCheckedPhone = null;
+                _lastUsernameTaken = false;
+                _lastEmailTaken = false;
+                _lastPhoneTaken = false;
+
                 ShowRegistrationSuccess("Your NovaChat account is ready. You can create another account or return to sign in.");
             }
             catch (OperationCanceledException) when (_viewCts.IsCancellationRequested)
