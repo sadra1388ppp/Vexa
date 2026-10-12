@@ -24,7 +24,12 @@ namespace NovaChat.Client.Views
         {
             InitializeComponent();
             _apiService = new ApiService();
-            LoginEnvironmentText.Text = VexaEnvironment.Name.ToUpperInvariant();
+            var environmentName =
+                Environment.GetEnvironmentVariable("VEXA_ENVIRONMENT") ??
+                Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ??
+                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??
+                "Development";
+            LoginEnvironmentText.Text = environmentName.ToUpperInvariant();
             Loaded += (_, _) => UserIdTextBox.Focus();
         }
 
