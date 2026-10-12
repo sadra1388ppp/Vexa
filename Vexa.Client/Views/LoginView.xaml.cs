@@ -23,6 +23,7 @@ namespace NovaChat.Client.Views
         private TranslateTransform? _pullTranslate;
         private CancellationTokenSource? _viewCts;
         private StackPanel? _loginContentPanel;
+        private StackPanel? _loginFieldsPanel;
         private Grid? _loginCardHost;
         private Border? _loginCardShadowSurface;
         private DropShadowEffect? _loginCardShadowEffect;
@@ -69,6 +70,7 @@ namespace NovaChat.Client.Views
         {
             InitializeComponent();
             _apiService = new ApiService();
+            _loginFieldsPanel = LoginCard.Child as StackPanel;
 
             // These gradient surfaces are static; only their visibility changes.
             // Cache each one once so WPF can composite opacity animations instead
@@ -181,7 +183,7 @@ namespace NovaChat.Client.Views
                 Effect = LoginCard.Effect is DropShadowEffect effect
                     ? (DropShadowEffect)effect.CloneCurrentValue()
                     : null,
-                Opacity = LoginCard.Opacity,
+                Opacity = _lampOn ? 1.0 : 0.0,
                 CacheMode = new BitmapCache(),
                 IsHitTestVisible = false,
                 Focusable = false,
@@ -501,7 +503,11 @@ namespace NovaChat.Client.Views
             AnimateOpacity(LampBulbGlow, on ? 0.65 : 0.02, 320, animate);
             AnimateOpacity(LampReflector, on ? 0.55 : 0.0, 320, animate);
             AnimateOpacity(WarmLightOverlay, on ? 0.78 : 0.0, 720, animate);
-            AnimateOpacity(LoginCard, on ? 1.0 : 0.0, 700, animate);
+            // Keep the interactive card out of an opacity group. Group opacity
+            // makes WPF render the full TextBox/PasswordBox/button tree to an
+            // intermediate surface each frame; fading individual controls avoids it.
+            LoginCard.Opacity = 1.0;
+            AnimateLoginFields(on, animate);
             if (_loginCardShadowSurface != null)
                 AnimateOpacity(_loginCardShadowSurface, on ? 1.0 : 0.0, 700, animate);
             AnimateOpacity(WelcomeText, on ? 1.0 : 0.0, 420, animate);
@@ -536,6 +542,16 @@ namespace NovaChat.Client.Views
             }
             else
                 target.SetValue(property, new SolidColorBrush(color));
+        }
+
+        private void AnimateLoginFields(bool visible, bool animate)
+        {
+            if (_loginFieldsPanel == null)
+                return;
+
+            double opacity = visible ? 1.0 : 0.0;
+            foreach (UIElement child in _loginFieldsPanel.Children)
+                AnimateOpacity(child, opacity, 700, animate);
         }
 
         private static void AnimateOpacity(UIElement element, double target, int milliseconds, bool animate)
