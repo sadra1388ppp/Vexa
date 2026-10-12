@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using NovaChat.Client.Models;
 using NovaChat.Client.Services;
 
@@ -19,6 +20,8 @@ namespace NovaChat.Client.Views
         private bool _suppressRegistrationStatusReset;
         private readonly CancellationTokenSource _viewCts = new();
         private bool _radialBackdropCached;
+        private Border? _registrationCard;
+        private Border? _registrationShadowSurface;
 
         public event Action? BackToLoginRequested;
 
@@ -42,11 +45,90 @@ namespace NovaChat.Client.Views
 
         private void RegisterView_Loaded(object sender, RoutedEventArgs e)
         {
-            if (_radialBackdropCached)
+            if (!_radialBackdropCached)
+            {
+                _radialBackdropCached = true;
+                CacheStaticRadialBackdrops(this);
+            }
+
+            IsolateRegistrationCardShadow();
+        }
+
+        private void IsolateRegistrationCardShadow()
+        {
+            if (_registrationShadowSurface != null)
                 return;
 
-            _radialBackdropCached = true;
-            CacheStaticRadialBackdrops(this);
+            var card = FindShadowedBorder(this);
+            if (card == null || card.Effect is not DropShadowEffect shadowEffect ||
+                VisualTreeHelper.GetParent(card) is not Panel parent)
+                return;
+
+            int index = parent.Children.IndexOf(card);
+            if (index < 0)
+                return;
+
+            // Keep the same card surface and shadow, but render the static surface
+            // separately. TextBox updates should not invalidate a shadow containing
+            // the entire live registration form.
+            var shadowSurface = new Border
+            {
+                Width = card.Width,
+                Height = card.ActualHeight > 0 ? card.ActualHeight : card.DesiredSize.Height,
+                MinWidth = card.MinWidth,
+                MaxWidth = card.MaxWidth,
+                HorizontalAlignment = card.HorizontalAlignment,
+                VerticalAlignment = card.VerticalAlignment,
+                Margin = card.Margin,
+                BorderThickness = card.BorderThickness,
+                CornerRadius = card.CornerRadius,
+                Background = card.Background,
+                BorderBrush = card.BorderBrush,
+                Effect = (DropShadowEffect)shadowEffect.CloneCurrentValue(),
+                CacheMode = new BitmapCache(),
+                IsHitTestVisible = false,
+                Focusable = false,
+                SnapsToDevicePixels = card.SnapsToDevicePixels
+            };
+
+            parent.Children.Insert(index, shadowSurface);
+
+            // Leave the live form, all fields, padding and sizes where they are.
+            // The sibling behind it now draws the original translucent surface.
+            card.Effect = null;
+            card.Background = Brushes.Transparent;
+            card.BorderBrush = Brushes.Transparent;
+            card.SizeChanged += RegistrationCard_SizeChanged;
+
+            _registrationCard = card;
+            _registrationShadowSurface = shadowSurface;
+        }
+
+        private static Border? FindShadowedBorder(DependencyObject parent)
+        {
+            if (parent is Border border && border.Effect is DropShadowEffect)
+                return border;
+
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var found = FindShadowedBorder(VisualTreeHelper.GetChild(parent, i));
+                if (found != null)
+                    return found;
+            }
+
+            return null;
+        }
+
+        private void RegistrationCard_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (_registrationShadowSurface == null)
+                return;
+
+            if (Math.Abs(_registrationShadowSurface.ActualHeight - e.NewSize.Height) > 0.5)
+                _registrationShadowSurface.Height = e.NewSize.Height;
+            if (Math.Abs(_registrationShadowSurface.ActualWidth - e.NewSize.Width) > 0.5)
+                _registrationShadowSurface.Width = e.NewSize.Width;
         }
 
         private static void CacheStaticRadialBackdrops(DependencyObject parent)
