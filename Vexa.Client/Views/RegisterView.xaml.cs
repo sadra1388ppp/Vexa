@@ -20,7 +20,6 @@ namespace NovaChat.Client.Views
         private bool _suppressRegistrationStatusReset;
         private readonly CancellationTokenSource _viewCts = new();
         private bool _radialBackdropCached;
-        private Border? _registrationCard;
         private Border? _registrationShadowSurface;
 
         public event Action? BackToLoginRequested;
@@ -100,7 +99,6 @@ namespace NovaChat.Client.Views
             card.BorderBrush = Brushes.Transparent;
             card.SizeChanged += RegistrationCard_SizeChanged;
 
-            _registrationCard = card;
             _registrationShadowSurface = shadowSurface;
         }
 
