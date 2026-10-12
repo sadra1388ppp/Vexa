@@ -178,7 +178,9 @@ namespace NovaChat.Client.Views
                 BorderThickness = LoginCard.BorderThickness,
                 CornerRadius = LoginCard.CornerRadius,
                 Padding = LoginCard.Padding,
-                Effect = LoginCard.Effect,
+                Effect = LoginCard.Effect is DropShadowEffect effect
+                    ? effect.CloneCurrentValue()
+                    : null,
                 Opacity = LoginCard.Opacity,
                 CacheMode = new BitmapCache(),
                 IsHitTestVisible = false,
