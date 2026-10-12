@@ -242,6 +242,13 @@ namespace NovaChat.Client.Views
             if (Interlocked.Exchange(ref _registrationInProgress, 1) == 1)
                 return;
 
+            // Registration is the final uniqueness check; cancel any advisory
+            // request so it cannot compete with or overwrite the submit flow.
+            var pendingAvailability = _availabilityCts;
+            _availabilityCts = null;
+            pendingAvailability?.Cancel();
+            pendingAvailability?.Dispose();
+
             var username = UsernameTextBox.Text.Trim();
             var displayName = DisplayNameTextBox.Text.Trim();
             var email = EmailTextBox.Text.Trim();
