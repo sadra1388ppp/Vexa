@@ -22,7 +22,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore NovaChat.slnx
+        run: dotnet restore Vexa.slnx
 
       - name: Build
-        run: dotnet build NovaChat.slnx --configuration Release --no-restore
+        run: dotnet build Vexa.slnx --configuration Release --no-restore
